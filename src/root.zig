@@ -67,12 +67,12 @@ pub const StringList = struct {
 
 pub const Block = struct {
     idx: Int,
-    len: Int = 0, //NOTE, could be auto-incremented
+    len: Int,
     flow: Flow,
 
-    const Flow = union(enum) {
+    pub const Flow = union(enum) {
         ret: Vdx,
-        jmp: Vdx,
+        jmp: Int,
         jnz: struct { cond: Vdx, lhs: Int, rhs: Int },
     };
 };
@@ -108,6 +108,13 @@ pub const Inst = union(enum) {
 pub const Location = struct {
     code: Int,
     typx: Int,
+
+    pub fn fmt(self: Location, graph: Graph, comptime Fmt: anytype) Fmt.Location {
+        return .{
+            .graph = graph,
+            .cell = self,
+        };
+    }
 };
 
 pub const Typx = union(enum) {
@@ -117,21 +124,26 @@ pub const Typx = union(enum) {
     },
     aggregate: StringList,
 
-    pub fn fmt(self: Typx, graph: Graph, comptime Fmt: anytype) Fmt.Type {
+    pub fn fmt(self: Typx, graph: Graph, comptime Fmt: anytype) Fmt.Typx {
         return .{
             .graph = graph,
             .cell = self,
         };
     }
 
-    //pub fn format(self: Typx, writer: *std.Io.Writer) !void {
-    //    switch (self) {
-    //        .primitive => |p| {
-    //            const bits = p.bits;
-    //            const sign = if (p.sign) 'i' else 'u';
+    //NOTE, size in bytes - bitpadding
+    pub fn size(self: Typx, graph: Graph) Int {
+        return switch (self) {
+            .primitive => |p| std.math.divCeil(Int, p.bits, 8) catch unreachable, //NOTE, if this ever fucking fails, ill eat pineapple on a pizza
+            .aggregate => |a| b: {
+                const items = graph.typxs.items[a.items..a.items+a.len];
+                var sz: Int = 0;
 
-    //            try writer.print("{c}{d}", .{sign, bits});
-    //        },
-    //    }
-    //}
+                for (items) |typx|
+                    sz += typx.size(graph);
+
+                break :b sz;
+            },
+        };
+    }
 };

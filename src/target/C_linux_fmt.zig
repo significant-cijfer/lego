@@ -7,12 +7,10 @@ const StringList = std.StringArrayHashMapUnmanaged;
 
 const Int = lib.Int;
 const Graph = lib.Graph;
-const Function = lib.Function;
-const Typx = lib.Typx;
 
 pub const Prototype = struct {
     graph: Graph,
-    cell: Function,
+    cell: lib.Function,
 
     pub fn format(self: Prototype, writer: *std.Io.Writer) !void {
         const graph = self.graph;
@@ -24,11 +22,25 @@ pub const Prototype = struct {
     }
 };
 
-pub const Type = struct {
+pub const Location = struct {
     graph: Graph,
-    cell: Typx,
+    cell: lib.Location,
 
-    pub fn format(self: Type, writer: *std.Io.Writer) !void {
+    pub fn format(self: Location, writer: *std.Io.Writer) !void {
+        const graph = self.graph;
+        const cell = self.cell;
+
+        _ = graph;
+        _ = cell;
+        _ = writer;
+    }
+};
+
+pub const Typx = struct {
+    graph: Graph,
+    cell: lib.Typx,
+
+    pub fn format(self: Typx, writer: *std.Io.Writer) !void {
         const graph = self.graph;
         const cell = self.cell;
 
