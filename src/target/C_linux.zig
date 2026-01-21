@@ -3,8 +3,8 @@ const lib = @import("lego");
 const fmt = @import("C_linux_fmt.zig");
 
 const Writer = std.Io.Writer;
+const HashMap = std.AutoHashMap;
 const ArrayList = std.ArrayList;
-const StringSet = std.StringHashMap(void);
 
 const Int = lib.Int;
 const Graph = lib.Graph;
@@ -12,6 +12,10 @@ const Function = lib.Function;
 const StringList = lib.StringList;
 const Block = lib.Block;
 const Inst = lib.Inst;
+
+fn HashSet(comptime T: type) type {
+    return HashMap(T, void);
+}
 
 pub fn emit(writer: *Writer, graph: Graph) !void {
     try writer.print("# <Start of file>\n", .{});
@@ -50,14 +54,14 @@ fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
     const gpa = graph.allocator;
 
     var todo = ArrayList(Int).empty;
-    var done = StringSet.init(gpa);
+    var done = HashSet(Int).init(gpa);
     defer todo.deinit(gpa);
     defer done.deinit();
 
     try todo.append(gpa, root);
 
     while (todo.pop()) |node| {
-        if (done.has(node)) continue;
+        if (done.contains(node)) continue;
 
         const block = graph.blocks.items[node];
         const insts = graph.insts.items[block.idx..block.idx+block.len];
@@ -83,7 +87,7 @@ fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
             },
         }
 
-        try done.append(node);
+        try done.put(node, {});
     }
 }
 
@@ -93,4 +97,7 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
 
     _ = graph;
     _ = inst;
+
+    //switch (inst) {
+    //}
 }

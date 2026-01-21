@@ -15,10 +15,18 @@ pub const Prototype = struct {
     pub fn format(self: Prototype, writer: *std.Io.Writer) !void {
         const graph = self.graph;
         const cell = self.cell;
+        const proto = cell.proto;
 
-        const ret = graph.typxs.items[cell.proto.ret];
+        const names = graph.strings.items[proto.prms.names..proto.prms.names+proto.prms.len];
+        const items = graph.typxs.items[proto.prms.items..proto.prms.items+proto.prms.len];
+        const ret = graph.typxs.items[proto.ret];
 
         try writer.print("{f} {s}(", .{ret.fmt(graph, fmt), cell.name});
+
+        for (names, items) |name, typx|
+            try writer.print("{f} {s},", .{typx.fmt(graph, fmt), name});
+
+        try writer.print(")", .{});
     }
 };
 
@@ -29,10 +37,12 @@ pub const Location = struct {
     pub fn format(self: Location, writer: *std.Io.Writer) !void {
         const graph = self.graph;
         const cell = self.cell;
+        const code = cell.code;
 
-        _ = graph;
-        _ = cell;
-        _ = writer;
+        if (code.local)
+            try writer.print("t{}", .{code.token})
+        else
+            try writer.print("{s}", .{graph.strings.items[code.token]});
     }
 };
 

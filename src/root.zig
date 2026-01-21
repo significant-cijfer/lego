@@ -14,7 +14,6 @@ pub const Graph = struct {
     blocks: ArrayList(Block),
     insts: ArrayList(Inst),
     typxs: ArrayList(Typx),
-    extra: ArrayList(Int),
     text: [:0]const u8,
 
     pub fn deinit(self: *Graph) void {
@@ -27,7 +26,6 @@ pub const Graph = struct {
         self.blocks.deinit(self.allocator);
         self.insts.deinit(self.allocator);
         self.typxs.deinit(self.allocator);
-        self.extra.deinit(self.allocator);
     }
 };
 
@@ -106,8 +104,14 @@ pub const Inst = union(enum) {
 };
 
 pub const Location = struct {
-    code: Int,
+    code: Code,
     typx: Int,
+
+    //TODO, figure out if `local should be placed above or below
+    const Code = packed struct {
+        local: bool,
+        token: std.meta.Int(.unsigned, @typeInfo(Int).int.bits-1),
+    };
 
     pub fn fmt(self: Location, graph: Graph, comptime Fmt: anytype) Fmt.Location {
         return .{
