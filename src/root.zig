@@ -98,6 +98,7 @@ pub const Inst = union(enum) {
 
     const VarOp = struct {
         dst: Vdx,
+        src: Vdx,
         idx: Int,
         len: Int,
     };
@@ -107,9 +108,9 @@ pub const Location = struct {
     code: Code,
     typx: Int,
 
-    //TODO, figure out if `local should be placed above or below
+    //TODO, figure out if `inter should be placed above or below
     const Code = packed struct {
-        local: bool,
+        temp: bool,
         token: std.meta.Int(.unsigned, @typeInfo(Int).int.bits-1),
     };
 

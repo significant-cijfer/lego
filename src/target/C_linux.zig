@@ -18,7 +18,8 @@ fn HashSet(comptime T: type) type {
 }
 
 pub fn emit(writer: *Writer, graph: Graph) !void {
-    try writer.print("# <Start of file>\n", .{});
+    try writer.print("// Start of file\n", .{});
+    try writer.print("#include <stdint.h>\n", .{});
 
     for (graph.functions.items) |function| {
         try emitFunction(writer, graph, function);
@@ -39,15 +40,14 @@ fn emitFunction(writer: *Writer, graph: Graph, function: Function) !void {
 }
 
 fn emitFunctionVarbs(writer: *Writer, graph: Graph, varbs: StringList) !void {
+    const names = graph.strings.items[varbs.names..varbs.names+varbs.len];
     const items = graph.locations.items[varbs.items..varbs.items+varbs.len];
-    var size: Int = 0;
 
-    for (items) |item| {
+    for (names, items) |name, item| {
         const typx = graph.typxs.items[item.typx];
-        size += typx.size(graph);
-    }
 
-    try writer.print("\tchar data[{d}];\n", .{size});
+        try writer.print("\t{f} {s};\n", .{typx.fmt(graph, fmt), name});
+    }
 }
 
 fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
@@ -65,6 +65,8 @@ fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
 
         const block = graph.blocks.items[node];
         const insts = graph.insts.items[block.idx..block.idx+block.len];
+
+        try writer.print("L{}:\n", .{node});
 
         for (insts) |inst| {
             try emitInst(writer, graph, inst);
@@ -92,12 +94,96 @@ fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
 }
 
 fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
-    //try writer.print("\t{f}\n", .{inst.fmt(graph)});
-    try writer.print("\t# TODO: inst\n", .{});
+    switch (inst) {
+        .put => |m| {
+            const dst = graph.locations.items[m.dst];
 
-    _ = graph;
-    _ = inst;
+            try writer.print("\t{f} = {d};\n", .{
+                dst.fmt(graph, fmt),
+                m.src,
+            });
+        },
+        .get => |m| {
+            const dst = graph.locations.items[m.dst];
+            const src = graph.locations.items[m.src];
 
-    //switch (inst) {
-    //}
+            const dtx = graph.typxs.items[dst.typx];
+
+            try writer.print("\t{f} = *({f} *) {f};\n", .{
+                dst.fmt(graph, fmt),
+                dtx.fmt(graph, fmt),
+                src.fmt(graph, fmt),
+            });
+        },
+        .set => |m| {
+            const dst = graph.locations.items[m.dst];
+            const src = graph.locations.items[m.src];
+
+            const dtx = graph.typxs.items[dst.typx];
+
+            try writer.print("\t*({f} *) {f} = {f};\n", .{
+                dtx.fmt(graph, fmt),
+                dst.fmt(graph, fmt),
+                src.fmt(graph, fmt),
+            });
+        },
+        .add => |b| {
+            const dst = graph.locations.items[b.dst];
+            const lhs = graph.locations.items[b.lhs];
+            const rhs = graph.locations.items[b.rhs];
+
+            try writer.print("\t{f} = {f} + {f};\n", .{
+                dst.fmt(graph, fmt),
+                lhs.fmt(graph, fmt),
+                rhs.fmt(graph, fmt),
+            });
+        },
+        .sub => |b| {
+            const dst = graph.locations.items[b.dst];
+            const lhs = graph.locations.items[b.lhs];
+            const rhs = graph.locations.items[b.rhs];
+
+            try writer.print("\t{f} = {f} - {f};\n", .{
+                dst.fmt(graph, fmt),
+                lhs.fmt(graph, fmt),
+                rhs.fmt(graph, fmt),
+            });
+        },
+        .mul => |b| {
+            const dst = graph.locations.items[b.dst];
+            const lhs = graph.locations.items[b.lhs];
+            const rhs = graph.locations.items[b.rhs];
+
+            try writer.print("\t{f} = {f} * {f};\n", .{
+                dst.fmt(graph, fmt),
+                lhs.fmt(graph, fmt),
+                rhs.fmt(graph, fmt),
+            });
+        },
+        .div => |b| {
+            const dst = graph.locations.items[b.dst];
+            const lhs = graph.locations.items[b.lhs];
+            const rhs = graph.locations.items[b.rhs];
+
+            try writer.print("\t{f} = {f} / {f};\n", .{
+                dst.fmt(graph, fmt),
+                lhs.fmt(graph, fmt),
+                rhs.fmt(graph, fmt),
+            });
+        },
+        .call => |v| {
+            const dst = graph.locations.items[v.dst];
+            const src = graph.locations.items[v.src];
+            const args = graph.locations.items[v.idx..v.idx+v.len];
+
+            try writer.print("\t{f} = {f}(", .{
+                dst.fmt(graph, fmt),
+                src.fmt(graph, fmt),
+            });
+
+            for (args) |arg| try writer.print("{f},", .{arg.fmt(graph, fmt)});
+
+            try writer.print(");\n", .{});
+        },
+    }
 }

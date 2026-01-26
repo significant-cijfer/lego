@@ -1,20 +1,13 @@
 const std = @import("std");
 const lib = @import("lego");
 
-const stderr = std.fs.File.stderr();
+const stdout = std.fs.File.stdout();
 
 const Graph = lib.Graph;
 
 pub fn main() !void {
-
-//}
-//
-//// This test only exists to force the compiler to fully check all files
-//test "Empty Graph (x86-64 linux)" {
-
     const target = @import("target/C_linux.zig");
 
-    //const gpa = std.testing.allocator;
     var dba = std.heap.DebugAllocator(.{}){};
     const gpa = dba.allocator();
 
@@ -32,19 +25,29 @@ pub fn main() !void {
     try graph.locations.appendSlice(gpa, &.{
         .{
             .code = .{
-                .local = true,
+                .temp = false,
                 .token = 0,
             },
             .typx = 1,
         },
     });
 
+    try graph.strings.appendSlice(gpa, &.{
+        "blep",
+    });
+
     try graph.blocks.appendSlice(gpa, &.{
         .{
             .idx = 0,
-            .len = 0,
+            .len = 1,
             .flow = .{ .ret = 0 },
         },
+    });
+
+    try graph.insts.appendSlice(gpa, &.{
+        .{ .put = .{ .dst = 0, .src = 103 } },
+        //.{ .add = .{ .dst = 0, .lhs = 0, .rhs = 0 } },
+        //.{ .set = .{ .dst = 0, .src = 0 } },
     });
 
     try graph.typxs.appendSlice(gpa, &.{
@@ -53,7 +56,7 @@ pub fn main() !void {
     });
 
     try graph.functions.append(gpa, .{
-        .name = "bleh",
+        .name = "main",
         .proto = .{
             .prms = .{
                 .names = 0,
@@ -65,13 +68,13 @@ pub fn main() !void {
         .varbs = .{
             .names = 0,
             .items = 0,
-            .len = 0,
+            .len = 1,
         },
         .block = 0,
     });
 
     var buffer: [8192]u8 = undefined;
-    var writer = stderr.writer(&buffer);
+    var writer = stdout.writer(&buffer);
 
     try target.emit(&writer.interface, graph);
 }

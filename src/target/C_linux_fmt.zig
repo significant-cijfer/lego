@@ -39,7 +39,7 @@ pub const Location = struct {
         const cell = self.cell;
         const code = cell.code;
 
-        if (code.local)
+        if (code.temp)
             try writer.print("t{}", .{code.token})
         else
             try writer.print("{s}", .{graph.strings.items[code.token]});
@@ -56,9 +56,9 @@ pub const Typx = struct {
 
         switch (cell) {
             .primitive => |p| {
-                const sign: u8 = if (p.sign) 'i' else 'u';
+                const sign = if (p.sign) "" else "u";
 
-                try writer.print("{c}{d}", .{sign, p.bits});
+                try writer.print("{s}int{d}_t", .{sign, p.bits});
             },
             .aggregate => |a| {
                 const names = graph.strings.items[a.names..a.names+a.len];
