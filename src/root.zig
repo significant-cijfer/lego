@@ -14,7 +14,6 @@ pub const Graph = struct {
     blocks: ArrayList(Block),
     insts: ArrayList(Inst),
     typxs: ArrayList(Typx),
-    text: [:0]const u8,
 
     pub fn deinit(self: *Graph) void {
         self.functions.deinit(self.allocator);
@@ -96,7 +95,7 @@ pub const Location = struct {
     code: Code,
     typx: Int,
 
-    //TODO, figure out if `inter should be placed above or below
+    //TODO, figure out if `temp` should be placed above or below
     const Code = packed struct {
         temp: bool,
         token: std.meta.Int(.unsigned, @typeInfo(Int).int.bits-1),

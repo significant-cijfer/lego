@@ -19,7 +19,6 @@ pub fn main() !void {
         .blocks = .empty,
         .insts = .empty,
         .typxs = .empty,
-        .text = "",
     };
     defer graph.deinit();
 
