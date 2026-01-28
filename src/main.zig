@@ -21,6 +21,7 @@ pub fn main() !void {
         .typxs = .empty,
         .text = "",
     };
+    defer graph.deinit();
 
     try graph.locations.appendSlice(gpa, &.{
         .{
@@ -34,6 +35,7 @@ pub fn main() !void {
 
     try graph.strings.appendSlice(gpa, &.{
         "blep",
+        "main",
     });
 
     try graph.blocks.appendSlice(gpa, &.{
@@ -56,7 +58,7 @@ pub fn main() !void {
     });
 
     try graph.functions.append(gpa, .{
-        .name = "main",
+        .ident = 1,
         .proto = .{
             .prms = .{
                 .names = 0,

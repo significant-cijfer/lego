@@ -17,11 +17,12 @@ pub const Prototype = struct {
         const cell = self.cell;
         const proto = cell.proto;
 
+        const ident = graph.strings.items[cell.ident];
         const names = graph.strings.items[proto.prms.names..proto.prms.names+proto.prms.len];
         const items = graph.typxs.items[proto.prms.items..proto.prms.items+proto.prms.len];
         const ret = graph.typxs.items[proto.ret];
 
-        try writer.print("{f} {s}(", .{ret.fmt(graph, fmt), cell.name});
+        try writer.print("{f} {s}(", .{ret.fmt(graph, fmt), ident});
 
         for (names, items) |name, typx|
             try writer.print("{f} {s},", .{typx.fmt(graph, fmt), name});

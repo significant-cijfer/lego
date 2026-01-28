@@ -17,9 +17,6 @@ pub const Graph = struct {
     text: [:0]const u8,
 
     pub fn deinit(self: *Graph) void {
-        for (self.functions.items) |function|
-            function.deinit();
-
         self.functions.deinit(self.allocator);
         self.locations.deinit(self.allocator);
         self.strings.deinit(self.allocator);
@@ -30,15 +27,10 @@ pub const Graph = struct {
 };
 
 pub const Function = struct {
-    name: []const u8,
+    ident: Int,
     proto: Prototype,
     varbs: StringList,
     block: Int,
-
-    pub fn deinit(self: *Function) void {
-        self.proto.deinit();
-        self.varbs.deinit();
-    }
 
     pub fn fmtProto(self: Function, graph: Graph, comptime Fmt: anytype) Fmt.Prototype {
         return .{
@@ -51,10 +43,6 @@ pub const Function = struct {
 const Prototype = struct {
     prms: StringList,
     ret: Int,
-
-    pub fn deinit(self: *Prototype) void {
-        self.prms.deinit();
-    }
 };
 
 pub const StringList = struct {
