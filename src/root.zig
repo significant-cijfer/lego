@@ -59,6 +59,12 @@ pub const Inst = union(enum) {
     sub: BinOp,
     mul: BinOp,
     div: BinOp,
+    eq: BinOp,
+    ne: BinOp,
+    lt: BinOp,
+    gt: BinOp,
+    le: BinOp,
+    ge: BinOp,
     call: VarOp,
 
     const ConOp = struct {

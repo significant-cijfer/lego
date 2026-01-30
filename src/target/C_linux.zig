@@ -127,47 +127,29 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
                 src.fmt(graph, fmt),
             });
         },
-        .add => |b| {
+        .add, .sub, .mul, .div, .eq, .ne, .lt, .gt, .le, .ge => |b| {
             const dst = graph.locations[b.dst];
             const lhs = graph.locations[b.lhs];
             const rhs = graph.locations[b.rhs];
 
-            try writer.print("\t{f} = {f} + {f};\n", .{
-                dst.fmt(graph, fmt),
-                lhs.fmt(graph, fmt),
-                rhs.fmt(graph, fmt),
-            });
-        },
-        .sub => |b| {
-            const dst = graph.locations[b.dst];
-            const lhs = graph.locations[b.lhs];
-            const rhs = graph.locations[b.rhs];
+            const op = switch (inst) {
+                .add => "+",
+                .sub => "-",
+                .mul => "*",
+                .div => "/",
+                .eq => "==",
+                .ne => "!=",
+                .lt => "<",
+                .gt => ">",
+                .le => "<=",
+                .ge => ">=",
+                else => unreachable,
+            };
 
-            try writer.print("\t{f} = {f} - {f};\n", .{
+            try writer.print("\t{f} = {f} {s} {f};\n", .{
                 dst.fmt(graph, fmt),
                 lhs.fmt(graph, fmt),
-                rhs.fmt(graph, fmt),
-            });
-        },
-        .mul => |b| {
-            const dst = graph.locations[b.dst];
-            const lhs = graph.locations[b.lhs];
-            const rhs = graph.locations[b.rhs];
-
-            try writer.print("\t{f} = {f} * {f};\n", .{
-                dst.fmt(graph, fmt),
-                lhs.fmt(graph, fmt),
-                rhs.fmt(graph, fmt),
-            });
-        },
-        .div => |b| {
-            const dst = graph.locations[b.dst];
-            const lhs = graph.locations[b.lhs];
-            const rhs = graph.locations[b.rhs];
-
-            try writer.print("\t{f} = {f} / {f};\n", .{
-                dst.fmt(graph, fmt),
-                lhs.fmt(graph, fmt),
+                op,
                 rhs.fmt(graph, fmt),
             });
         },
