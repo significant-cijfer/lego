@@ -12,6 +12,11 @@ pub const Graph = struct {
     blocks: []const Block,
     insts: []const Inst,
     typxs: []const Typx,
+    root: Root,
+};
+
+pub const Root = struct {
+    varbs: StringExtraList,
 };
 
 pub const Function = struct {
@@ -36,6 +41,13 @@ pub const Prototype = struct {
 pub const StringList = struct {
     names: Int,
     items: Int,
+    len: Int,
+};
+
+pub const StringExtraList = struct {
+    names: Int,
+    items: Int,
+    extra: Int,
     len: Int,
 };
 

@@ -1,6 +1,5 @@
 const std = @import("std");
 const lib = @import("lego");
-
 const stdout = std.fs.File.stdout();
 
 const Graph = lib.Graph;
@@ -41,17 +40,26 @@ pub fn main() !void {
                 },
                 .typx = 1,
             },
+            .{
+                .code = .{
+                    .temp = false,
+                    .token = 4,
+                },
+                .typx = 4,
+            },
         },
         .constants = &.{
             .{ .limbs = &.{10}, .positive = true },
             .{ .limbs = &.{103}, .positive = true },
             .{ .limbs = &.{105}, .positive = true },
+            .{ .limbs = &.{123}, .positive = true },
         },
         .strings = &.{
             "blep",
             "main",
             "argc",
             "argv",
+            "X",
         },
         .blocks = &.{
             .{
@@ -82,7 +90,16 @@ pub fn main() !void {
             .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 32, .sign = false } },
+            .{ .primitive = .{ .bits = 64, .sign = true } },
         },
+        .root = .{
+            .varbs = .{
+                .names = 4,
+                .items = 1,
+                .extra = 3,
+                .len = 1
+            },
+        }
     };
 
     var buffer: [8192]u8 = undefined;

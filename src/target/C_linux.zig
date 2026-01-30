@@ -9,8 +9,10 @@ const Allocator = std.mem.Allocator;
 
 const Int = lib.Int;
 const Graph = lib.Graph;
+const Root = lib.Root;
 const Function = lib.Function;
 const StringList = lib.StringList;
+const StringExtraList = lib.StringExtraList;
 const Block = lib.Block;
 const Inst = lib.Inst;
 
@@ -21,14 +23,33 @@ fn HashSet(comptime T: type) type {
 pub fn emit(writer: *Writer, gpa: Allocator, graph: Graph) !void {
     try writer.print("// Start of file\n", .{});
     try writer.print("#include <stdint.h>\n", .{});
+    try writer.print("\n", .{});
+
+    try emitRoot(writer, graph, graph.root);
+    try writer.print("\n", .{});
 
     for (graph.functions) |function| {
         try emitFunction(writer, gpa, graph, function);
-
         try writer.print("\n", .{});
     }
 
     try writer.flush();
+}
+
+fn emitRoot(writer: *Writer, graph: Graph, root: Root) !void {
+    try emitRootVarbs(writer, graph, root.varbs);
+}
+
+fn emitRootVarbs(writer: *Writer, graph: Graph, varbs: StringExtraList) !void {
+    const names = graph.strings[varbs.names..varbs.names+varbs.len];
+    const items = graph.locations[varbs.items..varbs.items+varbs.len];
+    const extra = graph.constants[varbs.extra..varbs.extra+varbs.len];
+
+    for (names, items, extra) |name, item, con| {
+        const typx = graph.typxs[item.typx];
+
+        try writer.print("{f} {s} = {d};\n", .{typx.fmt(graph, fmt), name, con});
+    }
 }
 
 fn emitFunction(writer: *Writer, gpa: Allocator, graph: Graph, function: Function) !void {
