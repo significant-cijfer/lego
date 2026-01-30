@@ -9,6 +9,8 @@ const TargetCLinux = @import("target/C_linux.zig");
 
 pub fn main() !void {
     var dba = std.heap.DebugAllocator(.{}){};
+    defer _ = dba.deinit();
+
     const gpa = dba.allocator();
 
     const graph = Graph{
@@ -17,9 +19,9 @@ pub fn main() !void {
                 .ident = 1,
                 .proto = .{
                     .prms = .{
-                        .names = 0,
-                        .items = 0,
-                        .len = 0,
+                        .names = 2,
+                        .items = 2,
+                        .len = 2,
                     },
                     .ret = 0,
                 },
@@ -40,23 +42,44 @@ pub fn main() !void {
                 .typx = 1,
             },
         },
+        .constants = &.{
+            .{ .limbs = &.{10}, .positive = true },
+            .{ .limbs = &.{103}, .positive = true },
+            .{ .limbs = &.{105}, .positive = true },
+        },
         .strings = &.{
             "blep",
             "main",
+            "argc",
+            "argv",
         },
         .blocks = &.{
             .{
                 .idx = 0,
                 .len = 1,
+                .flow = .{ .jnz = .{ .cond = 0, .lhs = 1, .rhs = 2 } },
+            },
+            .{
+                .idx = 1,
+                .len = 1,
+                .flow = .{ .ret = 0 },
+            },
+            .{
+                .idx = 2,
+                .len = 1,
                 .flow = .{ .ret = 0 },
             },
         },
         .insts = &.{
-            .{ .put = .{ .dst = 0, .src = 103 } },
+            .{ .put = .{ .dst = 0, .src = 0 } },
+            .{ .put = .{ .dst = 0, .src = 1 } },
+            .{ .put = .{ .dst = 0, .src = 2 } },
             //.{ .add = .{ .dst = 0, .lhs = 0, .rhs = 0 } },
             //.{ .set = .{ .dst = 0, .src = 0 } },
         },
         .typxs = &.{
+            .{ .primitive = .{ .bits = 32, .sign = false } },
+            .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 32, .sign = false } },
         },

@@ -3,7 +3,6 @@ const lib = @import("lego");
 const fmt = @import("C_linux_fmt.zig");
 
 const Writer = std.Io.Writer;
-const StringList = std.StringArrayHashMapUnmanaged;
 
 const Int = lib.Int;
 const Graph = lib.Graph;
@@ -24,8 +23,12 @@ pub const Prototype = struct {
 
         try writer.print("{f} {s}(", .{ret.fmt(graph, fmt), ident});
 
-        for (names, items) |name, typx|
-            try writer.print("{f} {s},", .{typx.fmt(graph, fmt), name});
+        for (names, items, 1..) |name, typx, idx| {
+            try writer.print("{f} {s}", .{typx.fmt(graph, fmt), name});
+
+            if (idx != proto.prms.len)
+                try writer.print(",", .{});
+        }
 
         try writer.print(")", .{});
     }
@@ -67,7 +70,7 @@ pub const Typx = struct {
 
                 try writer.print("struct {{", .{});
 
-                for (names, items) |name, c| try writer.print("{s}: {f},", .{name, c.fmt(graph, fmt)});
+                for (names, items) |name, c| try writer.print("{f} {s};", .{c.fmt(graph, fmt), name});
 
                 try writer.print("}}", .{});
             },

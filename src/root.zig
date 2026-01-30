@@ -2,10 +2,12 @@ const std = @import("std");
 
 pub const Int = u32;
 pub const Vdx = u32;
+pub const BigInt = std.math.big.int.Const;
 
 pub const Graph = struct {
     functions: []const Function,
     locations: []const Location,
+    constants: []const BigInt,
     strings: []const []const u8,
     blocks: []const Block,
     insts: []const Inst,
@@ -26,7 +28,7 @@ pub const Function = struct {
     }
 };
 
-const Prototype = struct {
+pub const Prototype = struct {
     prms: StringList,
     ret: Int,
 };
@@ -43,21 +45,26 @@ pub const Block = struct {
     flow: Flow,
 
     pub const Flow = union(enum) {
-        ret: Vdx,
+        ret: Int,
         jmp: Int,
         jnz: struct { cond: Vdx, lhs: Int, rhs: Int },
     };
 };
 
 pub const Inst = union(enum) {
-    put: MonOp, //constant
-    get: MonOp, //mem
-    set: MonOp, //mem
+    put: ConOp,
+    get: MonOp,
+    set: MonOp,
     add: BinOp,
     sub: BinOp,
     mul: BinOp,
     div: BinOp,
     call: VarOp,
+
+    const ConOp = struct {
+        dst: Vdx,
+        src: Int,
+    };
 
     const MonOp = struct {
         dst: Vdx,
@@ -115,10 +122,10 @@ pub const Typx = union(enum) {
         return switch (self) {
             .primitive => |p| std.math.divCeil(Int, p.bits, 8) catch unreachable, //NOTE, if this ever fucking fails, ill eat pineapple on a pizza
             .aggregate => |a| b: {
-                const items = graph.typxs.items[a.items..a.items+a.len];
+                const typxs = graph.typxs[a.items..a.items+a.len];
                 var sz: Int = 0;
 
-                for (items) |typx|
+                for (typxs) |typx|
                     sz += typx.size(graph);
 
                 break :b sz;

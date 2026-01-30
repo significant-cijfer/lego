@@ -82,9 +82,9 @@ fn emitFunctionBlock(writer: *Writer, gpa: Allocator, graph: Graph, root: Int) !
             },
             .jnz => |j| {
                 const location = graph.locations[j.cond];
-                try todo.append(gpa, j.lhs);
                 try todo.append(gpa, j.rhs);
-                try writer.print("\t({f}) ? ({{goto L{d};}}) : ({{goto L{d};}})\n", .{location.fmt(graph, fmt), j.lhs, j.rhs});
+                try todo.append(gpa, j.lhs);
+                try writer.print("\tif ({f}) goto L{d}; else goto L{d};\n", .{location.fmt(graph, fmt), j.lhs, j.rhs});
             },
         }
 
@@ -96,10 +96,11 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
     switch (inst) {
         .put => |m| {
             const dst = graph.locations[m.dst];
+            const src = graph.constants[m.src];
 
             try writer.print("\t{f} = {d};\n", .{
                 dst.fmt(graph, fmt),
-                m.src,
+                src,
             });
         },
         .get => |m| {
@@ -180,7 +181,12 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
                 src.fmt(graph, fmt),
             });
 
-            for (args) |arg| try writer.print("{f},", .{arg.fmt(graph, fmt)});
+            for (args, 1..) |arg, idx| {
+                try writer.print("{f}", .{arg.fmt(graph, fmt)});
+
+                if (idx != args.len)
+                    try writer.print(",", .{});
+            }
 
             try writer.print(");\n", .{});
         },
