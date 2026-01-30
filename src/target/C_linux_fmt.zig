@@ -14,6 +14,10 @@ pub const Fmt = struct {
         return .{ .graph = self.graph, .cell = t };
     }
 
+    pub fn con(self: Fmt, c: lib.Constant) Constant {
+        return .{ .graph = self.graph, .cell = c };
+    }
+
     pub fn proto(self: Fmt, func: lib.Function) Prototype {
         return .{ .graph = self.graph, .cell = func };
     }
@@ -59,6 +63,37 @@ pub const Location = struct {
             try writer.print("t{}", .{code.token})
         else
             try writer.print("{s}", .{f.graph.strings[code.token]});
+    }
+};
+
+pub const Constant = struct {
+    graph: *const Graph,
+    cell: lib.Constant,
+
+    pub fn format(self: Constant, writer: *std.Io.Writer) !void {
+        const f = Fmt{ .graph = self.graph };
+        const cell = self.cell;
+
+        switch (cell) {
+            .primitive => |p| {
+                try writer.print("{d}", .{p});
+            },
+            .aggregate => |a| {
+                const names = f.graph.strings[a.names..a.names+a.len];
+                const items = f.graph.constants[a.items..a.items+a.len];
+
+                try writer.print("{{", .{});
+
+                for (names, items, 1..) |name, item, idx| {
+                    try writer.print(".{s} = {f}", .{name, f.con(item)});
+
+                    if (idx != items.len)
+                        try writer.print(",", .{});
+                }
+
+                try writer.print("}}", .{});
+            },
+        }
     }
 };
 

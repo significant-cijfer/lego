@@ -7,7 +7,7 @@ pub const BigInt = std.math.big.int.Const;
 pub const Graph = struct {
     functions: []const Function,
     locations: []const Location,
-    constants: []const BigInt,
+    constants: []const Constant,
     strings: []const []const u8,
     blocks: []const Block,
     insts: []const Inst,
@@ -58,12 +58,21 @@ pub const Block = struct {
 
 pub const Inst = union(enum) {
     put: ConOp,
+    mov: MonOp,
     get: MonOp,
     set: MonOp,
+    neg: MonOp,
+    not: MonOp,
     add: BinOp,
     sub: BinOp,
     mul: BinOp,
     div: BinOp,
+    mod: BinOp,
+    ban: BinOp,
+    ior: BinOp,
+    xor: BinOp,
+    shl: BinOp,
+    shr: BinOp,
     eq: BinOp,
     ne: BinOp,
     lt: BinOp,
@@ -105,6 +114,11 @@ pub const Location = struct {
         temp: bool,
         token: std.meta.Int(.unsigned, @typeInfo(Int).int.bits-1),
     };
+};
+
+pub const Constant = union(enum) {
+    primitive: BigInt,
+    aggregate: StringList,
 };
 
 pub const Typx = union(enum) {

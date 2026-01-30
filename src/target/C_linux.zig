@@ -38,7 +38,7 @@ fn emitRootVarbs(writer: *Writer, f: Fmt, varbs: StringExtraList) !void {
     for (names, items, extra) |name, item, con| {
         const typx = f.graph.typxs[item.typx];
 
-        try writer.print("{f} {s} = {d};\n", .{f.typ(typx), name, con});
+        try writer.print("{f} {s} = {f};\n", .{f.typ(typx), name, f.con(con)});
     }
 }
 
@@ -109,9 +109,18 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.constants[m.src];
 
-            try writer.print("\t{f} = {d};\n", .{
+            try writer.print("\t{f} = {f};\n", .{
                 f.loc(dst),
-                src,
+                f.con(src),
+            });
+        },
+        .mov => |m| {
+            const dst = f.graph.locations[m.dst];
+            const src = f.graph.locations[m.src];
+
+            try writer.print("\t{f} = {f};\n", .{
+                f.loc(dst),
+                f.loc(src),
             });
         },
         .get => |m| {
@@ -138,7 +147,23 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
                 f.loc(src),
             });
         },
-        .add, .sub, .mul, .div, .eq, .ne, .lt, .gt, .le, .ge => |b| {
+        .neg, .not => |m| {
+            const dst = f.graph.locations[m.dst];
+            const src = f.graph.locations[m.src];
+
+            const op = switch (inst) {
+                .neg => "-",
+                .not => "~",
+                else => unreachable,
+            };
+
+            try writer.print("\t{f} = {s}{f};\n", .{
+                f.loc(dst),
+                op,
+                f.loc(src),
+            });
+        },
+        .add, .sub, .mul, .div, .mod, .ban, .ior, .xor, .shl, .shr, .eq, .ne, .lt, .gt, .le, .ge => |b| {
             const dst = f.graph.locations[b.dst];
             const lhs = f.graph.locations[b.lhs];
             const rhs = f.graph.locations[b.rhs];
@@ -148,6 +173,12 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
                 .sub => "-",
                 .mul => "*",
                 .div => "/",
+                .mod => "%",
+                .ban => "&",
+                .ior => "|",
+                .xor => "^",
+                .shl => "<<",
+                .shr => ">>",
                 .eq => "==",
                 .ne => "!=",
                 .lt => "<",

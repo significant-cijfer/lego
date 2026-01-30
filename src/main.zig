@@ -47,12 +47,22 @@ pub fn main() !void {
                 },
                 .typx = 4,
             },
+            .{
+                .code = .{
+                    .temp = false,
+                    .token = 5,
+                },
+                .typx = 5,
+            },
         },
         .constants = &.{
-            .{ .limbs = &.{10}, .positive = true },
-            .{ .limbs = &.{103}, .positive = true },
-            .{ .limbs = &.{105}, .positive = true },
-            .{ .limbs = &.{123}, .positive = true },
+            .{ .primitive = .{ .limbs = &.{10}, .positive = true } },
+            .{ .primitive = .{ .limbs = &.{103}, .positive = true } },
+            .{ .primitive = .{ .limbs = &.{105}, .positive = true } },
+            .{ .primitive = .{ .limbs = &.{123}, .positive = true } },
+            .{ .aggregate = .{ .names = 6, .items = 5, .len = 2 } },
+            .{ .primitive = .{ .limbs = &.{42}, .positive = true } },
+            .{ .primitive = .{ .limbs = &.{99}, .positive = true } },
         },
         .strings = &.{
             "blep",
@@ -60,6 +70,9 @@ pub fn main() !void {
             "argc",
             "argv",
             "X",
+            "agg",
+            "x",
+            "y",
         },
         .blocks = &.{
             .{
@@ -91,13 +104,14 @@ pub fn main() !void {
             .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 64, .sign = true } },
+            .{ .aggregate = .{ .names = 6, .items = 0, .len = 2 } },
         },
         .root = .{
             .varbs = .{
                 .names = 4,
                 .items = 1,
                 .extra = 3,
-                .len = 1
+                .len = 2
             },
         }
     };
