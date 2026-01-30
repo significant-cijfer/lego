@@ -5,6 +5,7 @@ const fmt = @import("C_linux_fmt.zig");
 const Writer = std.Io.Writer;
 const HashMap = std.AutoHashMap;
 const ArrayList = std.ArrayList;
+const Allocator = std.mem.Allocator;
 
 const Int = lib.Int;
 const Graph = lib.Graph;
@@ -17,12 +18,12 @@ fn HashSet(comptime T: type) type {
     return HashMap(T, void);
 }
 
-pub fn emit(writer: *Writer, graph: Graph) !void {
+pub fn emit(writer: *Writer, gpa: Allocator, graph: Graph) !void {
     try writer.print("// Start of file\n", .{});
     try writer.print("#include <stdint.h>\n", .{});
 
-    for (graph.functions.items) |function| {
-        try emitFunction(writer, graph, function);
+    for (graph.functions) |function| {
+        try emitFunction(writer, gpa, graph, function);
 
         try writer.print("\n", .{});
     }
@@ -30,29 +31,27 @@ pub fn emit(writer: *Writer, graph: Graph) !void {
     try writer.flush();
 }
 
-fn emitFunction(writer: *Writer, graph: Graph, function: Function) !void {
+fn emitFunction(writer: *Writer, gpa: Allocator, graph: Graph, function: Function) !void {
     try writer.print("{f} {{\n", .{function.fmtProto(graph, fmt)});
 
     try emitFunctionVarbs(writer, graph, function.varbs);
-    try emitFunctionBlock(writer, graph, function.block);
+    try emitFunctionBlock(writer, gpa, graph, function.block);
 
     try writer.print("}}\n", .{});
 }
 
 fn emitFunctionVarbs(writer: *Writer, graph: Graph, varbs: StringList) !void {
-    const names = graph.strings.items[varbs.names..varbs.names+varbs.len];
-    const items = graph.locations.items[varbs.items..varbs.items+varbs.len];
+    const names = graph.strings[varbs.names..varbs.names+varbs.len];
+    const items = graph.locations[varbs.items..varbs.items+varbs.len];
 
     for (names, items) |name, item| {
-        const typx = graph.typxs.items[item.typx];
+        const typx = graph.typxs[item.typx];
 
         try writer.print("\t{f} {s};\n", .{typx.fmt(graph, fmt), name});
     }
 }
 
-fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
-    const gpa = graph.allocator;
-
+fn emitFunctionBlock(writer: *Writer, gpa: Allocator, graph: Graph, root: Int) !void {
     var todo = ArrayList(Int).empty;
     var done = HashSet(Int).init(gpa);
     defer todo.deinit(gpa);
@@ -63,8 +62,8 @@ fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
     while (todo.pop()) |node| {
         if (done.contains(node)) continue;
 
-        const block = graph.blocks.items[node];
-        const insts = graph.insts.items[block.idx..block.idx+block.len];
+        const block = graph.blocks[node];
+        const insts = graph.insts[block.idx..block.idx+block.len];
 
         try writer.print("L{}:\n", .{node});
 
@@ -74,7 +73,7 @@ fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
 
         switch (block.flow) {
             .ret => |v| {
-                const location = graph.locations.items[v];
+                const location = graph.locations[v];
                 try writer.print("\treturn {f};\n", .{location.fmt(graph, fmt)});
             },
             .jmp => |j| {
@@ -82,7 +81,7 @@ fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
                 try writer.print("\tgoto L{d};\n", .{j});
             },
             .jnz => |j| {
-                const location = graph.locations.items[j.cond];
+                const location = graph.locations[j.cond];
                 try todo.append(gpa, j.lhs);
                 try todo.append(gpa, j.rhs);
                 try writer.print("\t({f}) ? ({{goto L{d};}}) : ({{goto L{d};}})\n", .{location.fmt(graph, fmt), j.lhs, j.rhs});
@@ -96,7 +95,7 @@ fn emitFunctionBlock(writer: *Writer, graph: Graph, root: Int) !void {
 fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
     switch (inst) {
         .put => |m| {
-            const dst = graph.locations.items[m.dst];
+            const dst = graph.locations[m.dst];
 
             try writer.print("\t{f} = {d};\n", .{
                 dst.fmt(graph, fmt),
@@ -104,10 +103,10 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
             });
         },
         .get => |m| {
-            const dst = graph.locations.items[m.dst];
-            const src = graph.locations.items[m.src];
+            const dst = graph.locations[m.dst];
+            const src = graph.locations[m.src];
 
-            const dtx = graph.typxs.items[dst.typx];
+            const dtx = graph.typxs[dst.typx];
 
             try writer.print("\t{f} = *({f} *) {f};\n", .{
                 dst.fmt(graph, fmt),
@@ -116,10 +115,10 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
             });
         },
         .set => |m| {
-            const dst = graph.locations.items[m.dst];
-            const src = graph.locations.items[m.src];
+            const dst = graph.locations[m.dst];
+            const src = graph.locations[m.src];
 
-            const dtx = graph.typxs.items[dst.typx];
+            const dtx = graph.typxs[dst.typx];
 
             try writer.print("\t*({f} *) {f} = {f};\n", .{
                 dtx.fmt(graph, fmt),
@@ -128,9 +127,9 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
             });
         },
         .add => |b| {
-            const dst = graph.locations.items[b.dst];
-            const lhs = graph.locations.items[b.lhs];
-            const rhs = graph.locations.items[b.rhs];
+            const dst = graph.locations[b.dst];
+            const lhs = graph.locations[b.lhs];
+            const rhs = graph.locations[b.rhs];
 
             try writer.print("\t{f} = {f} + {f};\n", .{
                 dst.fmt(graph, fmt),
@@ -139,9 +138,9 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
             });
         },
         .sub => |b| {
-            const dst = graph.locations.items[b.dst];
-            const lhs = graph.locations.items[b.lhs];
-            const rhs = graph.locations.items[b.rhs];
+            const dst = graph.locations[b.dst];
+            const lhs = graph.locations[b.lhs];
+            const rhs = graph.locations[b.rhs];
 
             try writer.print("\t{f} = {f} - {f};\n", .{
                 dst.fmt(graph, fmt),
@@ -150,9 +149,9 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
             });
         },
         .mul => |b| {
-            const dst = graph.locations.items[b.dst];
-            const lhs = graph.locations.items[b.lhs];
-            const rhs = graph.locations.items[b.rhs];
+            const dst = graph.locations[b.dst];
+            const lhs = graph.locations[b.lhs];
+            const rhs = graph.locations[b.rhs];
 
             try writer.print("\t{f} = {f} * {f};\n", .{
                 dst.fmt(graph, fmt),
@@ -161,9 +160,9 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
             });
         },
         .div => |b| {
-            const dst = graph.locations.items[b.dst];
-            const lhs = graph.locations.items[b.lhs];
-            const rhs = graph.locations.items[b.rhs];
+            const dst = graph.locations[b.dst];
+            const lhs = graph.locations[b.lhs];
+            const rhs = graph.locations[b.rhs];
 
             try writer.print("\t{f} = {f} / {f};\n", .{
                 dst.fmt(graph, fmt),
@@ -172,9 +171,9 @@ fn emitInst(writer: *Writer, graph: Graph, inst: Inst) !void {
             });
         },
         .call => |v| {
-            const dst = graph.locations.items[v.dst];
-            const src = graph.locations.items[v.src];
-            const args = graph.locations.items[v.idx..v.idx+v.len];
+            const dst = graph.locations[v.dst];
+            const src = graph.locations[v.src];
+            const args = graph.locations[v.idx..v.idx+v.len];
 
             try writer.print("\t{f} = {f}(", .{
                 dst.fmt(graph, fmt),

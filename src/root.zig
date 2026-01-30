@@ -1,28 +1,15 @@
 const std = @import("std");
 
-const Allocator = std.mem.Allocator;
-const ArrayList = std.ArrayList;
-
 pub const Int = u32;
 pub const Vdx = u32;
 
 pub const Graph = struct {
-    allocator: Allocator,
-    functions: ArrayList(Function),
-    locations: ArrayList(Location),
-    strings: ArrayList([]const u8),
-    blocks: ArrayList(Block),
-    insts: ArrayList(Inst),
-    typxs: ArrayList(Typx),
-
-    pub fn deinit(self: *Graph) void {
-        self.functions.deinit(self.allocator);
-        self.locations.deinit(self.allocator);
-        self.strings.deinit(self.allocator);
-        self.blocks.deinit(self.allocator);
-        self.insts.deinit(self.allocator);
-        self.typxs.deinit(self.allocator);
-    }
+    functions: []const Function,
+    locations: []const Location,
+    strings: []const []const u8,
+    blocks: []const Block,
+    insts: []const Inst,
+    typxs: []const Typx,
 };
 
 pub const Function = struct {

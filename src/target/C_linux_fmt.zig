@@ -17,10 +17,10 @@ pub const Prototype = struct {
         const cell = self.cell;
         const proto = cell.proto;
 
-        const ident = graph.strings.items[cell.ident];
-        const names = graph.strings.items[proto.prms.names..proto.prms.names+proto.prms.len];
-        const items = graph.typxs.items[proto.prms.items..proto.prms.items+proto.prms.len];
-        const ret = graph.typxs.items[proto.ret];
+        const ident = graph.strings[cell.ident];
+        const names = graph.strings[proto.prms.names..proto.prms.names+proto.prms.len];
+        const items = graph.typxs[proto.prms.items..proto.prms.items+proto.prms.len];
+        const ret = graph.typxs[proto.ret];
 
         try writer.print("{f} {s}(", .{ret.fmt(graph, fmt), ident});
 
@@ -43,7 +43,7 @@ pub const Location = struct {
         if (code.temp)
             try writer.print("t{}", .{code.token})
         else
-            try writer.print("{s}", .{graph.strings.items[code.token]});
+            try writer.print("{s}", .{graph.strings[code.token]});
     }
 };
 
@@ -62,8 +62,8 @@ pub const Typx = struct {
                 try writer.print("{s}int{d}_t", .{sign, p.bits});
             },
             .aggregate => |a| {
-                const names = graph.strings.items[a.names..a.names+a.len];
-                const items = graph.typxs.items[a.items..a.items+a.len];
+                const names = graph.strings[a.names..a.names+a.len];
+                const items = graph.typxs[a.items..a.items+a.len];
 
                 try writer.print("struct {{", .{});
 
