@@ -24,13 +24,6 @@ pub const Function = struct {
     proto: Prototype,
     varbs: StringList,
     block: Int,
-
-    pub fn fmtProto(self: Function, graph: Graph, comptime Fmt: anytype) Fmt.Prototype {
-        return .{
-            .graph = graph,
-            .cell = self,
-        };
-    }
 };
 
 pub const Prototype = struct {
@@ -112,13 +105,6 @@ pub const Location = struct {
         temp: bool,
         token: std.meta.Int(.unsigned, @typeInfo(Int).int.bits-1),
     };
-
-    pub fn fmt(self: Location, graph: Graph, comptime Fmt: anytype) Fmt.Location {
-        return .{
-            .graph = graph,
-            .cell = self,
-        };
-    }
 };
 
 pub const Typx = union(enum) {
@@ -128,15 +114,8 @@ pub const Typx = union(enum) {
     },
     aggregate: StringList,
 
-    pub fn fmt(self: Typx, graph: Graph, comptime Fmt: anytype) Fmt.Typx {
-        return .{
-            .graph = graph,
-            .cell = self,
-        };
-    }
-
     //NOTE, size in bytes - bitpadding
-    pub fn size(self: Typx, graph: Graph) Int {
+    pub fn size(self: Typx, graph: *const Graph) Int {
         return switch (self) {
             .primitive => |p| std.math.divCeil(Int, p.bits, 8) catch unreachable, //NOTE, if this ever fucking fails, ill eat pineapple on a pizza
             .aggregate => |a| b: {

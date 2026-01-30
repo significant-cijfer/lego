@@ -1,30 +1,42 @@
 const std = @import("std");
 const lib = @import("lego");
-const fmt = @import("C_linux_fmt.zig");
 
-const Writer = std.Io.Writer;
-
-const Int = lib.Int;
 const Graph = lib.Graph;
 
+pub const Fmt = struct {
+    graph: *const Graph,
+
+    pub fn loc(self: Fmt, l: lib.Location) Location {
+        return .{ .graph = self.graph, .cell = l };
+    }
+
+    pub fn typ(self: Fmt, t: lib.Typx) Typx {
+        return .{ .graph = self.graph, .cell = t };
+    }
+
+    pub fn proto(self: Fmt, func: lib.Function) Prototype {
+        return .{ .graph = self.graph, .cell = func };
+    }
+};
+
 pub const Prototype = struct {
-    graph: Graph,
+    graph: *const Graph,
     cell: lib.Function,
 
     pub fn format(self: Prototype, writer: *std.Io.Writer) !void {
-        const graph = self.graph;
+        const f = Fmt{ .graph = self.graph };
         const cell = self.cell;
         const proto = cell.proto;
 
-        const ident = graph.strings[cell.ident];
-        const names = graph.strings[proto.prms.names..proto.prms.names+proto.prms.len];
-        const items = graph.typxs[proto.prms.items..proto.prms.items+proto.prms.len];
-        const ret = graph.typxs[proto.ret];
+        const ident = f.graph.strings[cell.ident];
+        const names = f.graph.strings[proto.prms.names..proto.prms.names+proto.prms.len];
+        const items = f.graph.typxs[proto.prms.items..proto.prms.items+proto.prms.len];
+        const ret = f.graph.typxs[proto.ret];
 
-        try writer.print("{f} {s}(", .{ret.fmt(graph, fmt), ident});
+        try writer.print("{f} {s}(", .{f.typ(ret), ident});
 
         for (names, items, 1..) |name, typx, idx| {
-            try writer.print("{f} {s}", .{typx.fmt(graph, fmt), name});
+            try writer.print("{f} {s}", .{f.typ(typx), name});
 
             if (idx != proto.prms.len)
                 try writer.print(",", .{});
@@ -35,27 +47,27 @@ pub const Prototype = struct {
 };
 
 pub const Location = struct {
-    graph: Graph,
+    graph: *const Graph,
     cell: lib.Location,
 
     pub fn format(self: Location, writer: *std.Io.Writer) !void {
-        const graph = self.graph;
+        const f = Fmt{ .graph = self.graph };
         const cell = self.cell;
         const code = cell.code;
 
         if (code.temp)
             try writer.print("t{}", .{code.token})
         else
-            try writer.print("{s}", .{graph.strings[code.token]});
+            try writer.print("{s}", .{f.graph.strings[code.token]});
     }
 };
 
 pub const Typx = struct {
-    graph: Graph,
+    graph: *const Graph,
     cell: lib.Typx,
 
     pub fn format(self: Typx, writer: *std.Io.Writer) !void {
-        const graph = self.graph;
+        const f = Fmt{ .graph = self.graph };
         const cell = self.cell;
 
         switch (cell) {
@@ -65,12 +77,12 @@ pub const Typx = struct {
                 try writer.print("{s}int{d}_t", .{sign, p.bits});
             },
             .aggregate => |a| {
-                const names = graph.strings[a.names..a.names+a.len];
-                const items = graph.typxs[a.items..a.items+a.len];
+                const names = f.graph.strings[a.names..a.names+a.len];
+                const items = f.graph.typxs[a.items..a.items+a.len];
 
                 try writer.print("struct {{", .{});
 
-                for (names, items) |name, c| try writer.print("{f} {s};", .{c.fmt(graph, fmt), name});
+                for (names, items) |name, c| try writer.print("{f} {s};", .{f.typ(c), name});
 
                 try writer.print("}}", .{});
             },

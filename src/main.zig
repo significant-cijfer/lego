@@ -1,10 +1,10 @@
 const std = @import("std");
 const lib = @import("lego");
+const backend = @import("backend.zig");
+
 const stdout = std.fs.File.stdout();
 
 const Graph = lib.Graph;
-
-const TargetCLinux = @import("target/C_linux.zig");
 
 pub fn main() !void {
     var dba = std.heap.DebugAllocator(.{}){};
@@ -105,5 +105,5 @@ pub fn main() !void {
     var buffer: [8192]u8 = undefined;
     var writer = stdout.writer(&buffer);
 
-    try TargetCLinux.emit(&writer.interface, gpa, graph);
+    try backend.emit(&writer.interface, gpa, graph, .c_linux);
 }
