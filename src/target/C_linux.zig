@@ -1,5 +1,5 @@
 const std = @import("std");
-const lib = @import("lego");
+const lib = @import("../root.zig");
 const fmt = @import("C_linux_fmt.zig");
 
 const Writer = std.Io.Writer;

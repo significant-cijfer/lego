@@ -1,8 +1,9 @@
 const std = @import("std");
-const lib = @import("lego");
+const lib = @import("root.zig");
 
 const Writer = std.Io.Writer;
 const Allocator = std.mem.Allocator;
+
 const Graph = lib.Graph;
 
 pub const Target = enum {

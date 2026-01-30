@@ -1,5 +1,5 @@
 const std = @import("std");
-const lib = @import("lego");
+const lib = @import("../root.zig");
 
 const Graph = lib.Graph;
 

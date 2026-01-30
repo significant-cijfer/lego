@@ -1,10 +1,10 @@
 const std = @import("std");
 const lib = @import("lego");
-const backend = @import("backend.zig");
 
 const stdout = std.fs.File.stdout();
 
 const Graph = lib.Graph;
+const backend = lib.backend;
 
 pub fn main() !void {
     var dba = std.heap.DebugAllocator(.{}){};
