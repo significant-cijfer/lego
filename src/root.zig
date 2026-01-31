@@ -18,7 +18,7 @@ pub const Graph = struct {
 };
 
 pub const Root = struct {
-    varbs: StringExtraList,
+    varbs: LocationExtraList,
 };
 
 pub const Function = struct {
@@ -38,16 +38,15 @@ pub const LocationList = struct {
     len: Int,
 };
 
-pub const StringList = struct {
-    names: Int,
+pub const LocationExtraList = struct {
     items: Int,
+    extra: Int,
     len: Int,
 };
 
-pub const StringExtraList = struct {
+pub const StringList = struct {
     names: Int,
     items: Int,
-    extra: Int,
     len: Int,
 };
 

@@ -107,7 +107,6 @@ pub fn main() !void {
         },
         .root = .{
             .varbs = .{
-                .names = 4,
                 .items = 1,
                 .extra = 3,
                 .len = 2

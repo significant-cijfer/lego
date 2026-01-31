@@ -10,9 +10,8 @@ const Allocator = std.mem.Allocator;
 const Int = lib.Int;
 const Root = lib.Root;
 const Function = lib.Function;
-const StringList = lib.StringList;
 const LocationList = lib.LocationList;
-const StringExtraList = lib.StringExtraList;
+const LocationExtraList = lib.LocationExtraList;
 const Block = lib.Block;
 const Inst = lib.Inst;
 
@@ -31,15 +30,14 @@ pub fn emitRoot(writer: *Writer, f: Fmt, root: Root) !void {
     try emitRootVarbs(writer, f, root.varbs);
 }
 
-fn emitRootVarbs(writer: *Writer, f: Fmt, varbs: StringExtraList) !void {
-    const names = f.graph.strings[varbs.names..varbs.names+varbs.len];
+fn emitRootVarbs(writer: *Writer, f: Fmt, varbs: LocationExtraList) !void {
     const items = f.graph.locations[varbs.items..varbs.items+varbs.len];
     const extra = f.graph.constants[varbs.extra..varbs.extra+varbs.len];
 
-    for (names, items, extra) |name, item, con| {
+    for (items, extra) |item, con| {
         const typx = f.graph.typxs[item.typx];
 
-        try writer.print("{f} {s} = {f};\n", .{f.typ(typx), name, f.con(con)});
+        try writer.print("{f} {f} = {f};\n", .{f.typ(typx), f.loc(item), f.con(con)});
     }
 }
 
