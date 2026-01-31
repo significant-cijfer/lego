@@ -25,7 +25,6 @@ pub fn main() !void {
                     .ret = 0,
                 },
                 .varbs = .{
-                    .names = 0,
                     .items = 0,
                     .len = 1,
                 },

@@ -11,6 +11,7 @@ const Int = lib.Int;
 const Root = lib.Root;
 const Function = lib.Function;
 const StringList = lib.StringList;
+const LocationList = lib.LocationList;
 const StringExtraList = lib.StringExtraList;
 const Block = lib.Block;
 const Inst = lib.Inst;
@@ -51,14 +52,13 @@ pub fn emitFunction(writer: *Writer, gpa: Allocator, f: Fmt, function: Function)
     try writer.print("}}\n", .{});
 }
 
-fn emitFunctionVarbs(writer: *Writer, f: Fmt, varbs: StringList) !void {
-    const names = f.graph.strings[varbs.names..varbs.names+varbs.len];
+fn emitFunctionVarbs(writer: *Writer, f: Fmt, varbs: LocationList) !void {
     const items = f.graph.locations[varbs.items..varbs.items+varbs.len];
 
-    for (names, items) |name, item| {
+    for (items) |item| {
         const typx = f.graph.typxs[item.typx];
 
-        try writer.print("\t{f} {s};\n", .{f.typ(typx), name});
+        try writer.print("\t{f} {f};\n", .{f.typ(typx), f.loc(item)});
     }
 }
 

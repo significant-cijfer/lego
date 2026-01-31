@@ -24,13 +24,18 @@ pub const Root = struct {
 pub const Function = struct {
     ident: Int,
     proto: Prototype,
-    varbs: StringList,
+    varbs: LocationList,
     block: Int,
 };
 
 pub const Prototype = struct {
     prms: StringList,
     ret: Int,
+};
+
+pub const LocationList = struct {
+    items: Int,
+    len: Int,
 };
 
 pub const StringList = struct {
