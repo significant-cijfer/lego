@@ -87,23 +87,23 @@ pub const Inst = union(enum) {
     ge: BinOp,
     call: VarOp,
 
-    const ConOp = struct {
+    pub const ConOp = struct {
         dst: Vdx,
         src: Int,
     };
 
-    const MonOp = struct {
+    pub const MonOp = struct {
         dst: Vdx,
         src: Vdx,
     };
 
-    const BinOp = struct {
+    pub const BinOp = struct {
         dst: Vdx,
         lhs: Vdx,
         rhs: Vdx,
     };
 
-    const VarOp = struct {
+    pub const VarOp = struct {
         dst: Vdx,
         src: Vdx,
         idx: Int,
@@ -115,10 +115,9 @@ pub const Location = struct {
     code: Code,
     typx: Int,
 
-    //TODO, figure out if `temp` should be placed above or below
-    const Code = packed struct {
+    const Code = struct {
+        token: Int,
         temp: bool,
-        token: std.meta.Int(.unsigned, @typeInfo(Int).int.bits-1),
     };
 };
 
