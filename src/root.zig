@@ -127,6 +127,7 @@ pub const Constant = union(enum) {
 };
 
 pub const Typx = union(enum) {
+    word: void,
     primitive: struct {
         bits: Int,
         sign: bool,
@@ -136,6 +137,7 @@ pub const Typx = union(enum) {
     //NOTE, size in bytes - bitpadding
     pub fn size(self: Typx, graph: *const Graph) Int {
         return switch (self) {
+            .word => 8, //TODO, this should be platform specific, im assuming 8bytes for now (amd64)
             .primitive => |p| std.math.divCeil(Int, p.bits, 8) catch unreachable, //NOTE, if this ever fucking fails, ill eat pineapple on a pizza
             .aggregate => |a| b: {
                 const typxs = graph.typxs[a.items..a.items+a.len];

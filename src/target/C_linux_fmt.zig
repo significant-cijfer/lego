@@ -106,6 +106,9 @@ pub const Typx = struct {
         const cell = self.cell;
 
         switch (cell) {
+            .word => {
+                try writer.print("int64_t", .{});
+            },
             .primitive => |p| {
                 const sign = if (p.sign) "" else "u";
 
