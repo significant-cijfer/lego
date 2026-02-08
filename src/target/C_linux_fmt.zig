@@ -109,6 +109,9 @@ pub const Typx = struct {
             .word => {
                 try writer.print("int64_t", .{});
             },
+            .pointer => {
+                try writer.print("void*", .{});
+            },
             .primitive => |p| {
                 const sign = if (p.sign) "" else "u";
 
