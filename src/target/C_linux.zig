@@ -10,6 +10,7 @@ const Allocator = std.mem.Allocator;
 const Int = lib.Int;
 const Root = lib.Root;
 const Function = lib.Function;
+const StringList = lib.StringList;
 const LocationList = lib.LocationList;
 const LocationExtraList = lib.LocationExtraList;
 const Block = lib.Block;
@@ -27,7 +28,17 @@ pub fn emitHeader(writer: *Writer) !void {
 }
 
 pub fn emitRoot(writer: *Writer, f: Fmt, root: Root) !void {
+    try emitRootImports(writer, f, root.imports);
     try emitRootVarbs(writer, f, root.varbs);
+}
+
+fn emitRootImports(writer: *Writer, f: Fmt, imports: StringList) !void {
+    const names = f.graph.strings[imports.names..imports.names+imports.len];
+    const items = f.graph.typxs[imports.items..imports.items+imports.len];
+
+    for (names, items) |name, item| {
+        try writer.print("extern {f} {s};\n", .{f.typ(item), name});
+    }
 }
 
 fn emitRootVarbs(writer: *Writer, f: Fmt, varbs: LocationExtraList) !void {

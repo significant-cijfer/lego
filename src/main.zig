@@ -72,6 +72,7 @@ pub fn main() !void {
             "agg",
             "x",
             "y",
+            "Z",
         },
         .blocks = &.{
             .{
@@ -104,8 +105,14 @@ pub fn main() !void {
             .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 64, .sign = true } },
             .{ .aggregate = .{ .names = 6, .items = 0, .len = 2 } },
+            .{ .primitive = .{ .bits = 16, .sign = true } },
         },
         .root = .{
+            .imports = .{
+                .names = 8,
+                .items = 6,
+                .len = 1
+            },
             .varbs = .{
                 .items = 1,
                 .extra = 3,

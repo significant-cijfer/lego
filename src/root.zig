@@ -18,6 +18,7 @@ pub const Graph = struct {
 };
 
 pub const Root = struct {
+    imports: StringList,
     varbs: LocationExtraList,
 };
 
