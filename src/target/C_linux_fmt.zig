@@ -120,7 +120,7 @@ pub const Typx = struct {
             .pointer => |c| {
                 const child = f.graph.locations[c];
 
-                try writer.print("({f})*", .{f.typ(child)});
+                try writer.print("{f}*", .{f.typ(child)});
             },
             .primitive => |p| {
                 const sign = if (p.sign) "" else "u";
