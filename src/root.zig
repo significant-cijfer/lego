@@ -129,8 +129,9 @@ pub const Constant = union(enum) {
 };
 
 pub const Typx = union(enum) {
+    noval: void,
     word: void,
-    pointer: void,
+    pointer: Int,
     function: Callable,
     primitive: Primitive,
     aggregate: StringList,
@@ -145,7 +146,6 @@ pub const Typx = union(enum) {
         len: Int,
         ret: Int,
     };
-
 
     //NOTE, size in bytes - bitpadding
     pub fn size(self: Typx, graph: *const Graph) Int {

@@ -111,11 +111,16 @@ pub const Typx = struct {
         const typx = self.graph.typxs[cell.typx];
 
         switch (typx) {
+            .noval => {
+                try writer.print("void", .{});
+            },
             .word => {
                 try writer.print("int64_t", .{});
             },
-            .pointer => {
-                try writer.print("void*", .{});
+            .pointer => |c| {
+                const child = f.graph.locations[c];
+
+                try writer.print("({f})*", .{f.typ(child)});
             },
             .primitive => |p| {
                 const sign = if (p.sign) "" else "u";
