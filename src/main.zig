@@ -18,11 +18,10 @@ pub fn main() !void {
                 .ident = 1,
                 .proto = .{
                     .prms = .{
-                        .names = 2,
-                        .items = 2,
+                        .items = 5,
                         .len = 2,
                     },
-                    .ret = 0,
+                    .ret = 4,
                 },
                 .varbs = .{
                     .items = 0,
@@ -32,35 +31,15 @@ pub fn main() !void {
             }
         },
         .locations = &.{
-            .{
-                .code = .{
-                    .temp = false,
-                    .token = 0,
-                },
-                .typx = 1,
-            },
-            .{
-                .code = .{
-                    .temp = false,
-                    .token = 4,
-                },
-                .typx = 4,
-            },
-            .{
-                .code = .{
-                    .temp = false,
-                    .token = 5,
-                },
-                .typx = 5,
-            },
-        },
-        .callables = &.{
-            .{
-                .name = 9,
-                .prms = 7,
-                .len = 1,
-                .ret = 7
-            },
+            .{ .code = .{ .temp = false, .token = 0 }, .typx = 1 },
+            .{ .code = .{ .temp = false, .token = 4 }, .typx = 4 },
+            .{ .code = .{ .temp = false, .token = 5 }, .typx = 5 },
+            .{ .code = .{ .temp = false, .token = 9 }, .typx = 8 },
+            .{ .code = .{ .temp = true, .token = 0 }, .typx = 0 },
+            .{ .code = .{ .temp = false, .token = 2 }, .typx = 2 },
+            .{ .code = .{ .temp = false, .token = 3 }, .typx = 3 },
+            .{ .code = .{ .temp = true, .token = 1 }, .typx = 7 },
+            .{ .code = .{ .temp = true, .token = 2 }, .typx = 7 },
         },
         .constants = &.{
             .{ .primitive = .{ .limbs = &.{10}, .positive = true } },
@@ -116,6 +95,7 @@ pub fn main() !void {
             .{ .aggregate = .{ .names = 6, .items = 0, .len = 2 } },
             .{ .primitive = .{ .bits = 16, .sign = true } },
             .{ .primitive = .{ .bits = 64, .sign = false } },
+            .{ .function = .{ .prms = 7, .len = 1, .ret = 8 }},
         },
         .root = .{
             .imports = .{
@@ -124,7 +104,7 @@ pub fn main() !void {
                 .len = 1
             },
             .externs = .{
-                .items = 0,
+                .items = 3,
                 .len = 1,
             },
             .varbs = .{

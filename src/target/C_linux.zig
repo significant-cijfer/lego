@@ -10,7 +10,6 @@ const Allocator = std.mem.Allocator;
 const Int = lib.Int;
 const Root = lib.Root;
 const Function = lib.Function;
-const CallList = lib.CallList;
 const StringList = lib.StringList;
 const LocationList = lib.LocationList;
 const LocationExtraList = lib.LocationExtraList;
@@ -35,16 +34,18 @@ pub fn emitRoot(writer: *Writer, f: Fmt, root: Root) !void {
 }
 
 fn emitRootImports(writer: *Writer, f: Fmt, imports: StringList) !void {
-    const names = f.graph.strings[imports.names..imports.names+imports.len];
-    const items = f.graph.typxs[imports.items..imports.items+imports.len];
+    for (imports.names..imports.names+imports.len, imports.items..imports.items+imports.len) |name, item| {
+        const loc = lib.Location{
+            .code = .{ .token = @intCast(name), .temp = false },
+            .typx = @intCast(item),
+        };
 
-    for (names, items) |name, item| {
-        try writer.print("extern {f} {s};\n", .{f.typ(item), name});
+        try writer.print("extern {f} {f};\n", .{f.typ(loc), f.loc(loc)});
     }
 }
 
-fn emitRootExterns(writer: *Writer, f: Fmt, externs: CallList) !void {
-    const items = f.graph.callables[externs.items..externs.items+externs.len];
+fn emitRootExterns(writer: *Writer, f: Fmt, externs: LocationList) !void {
+    const items = f.graph.locations[externs.items..externs.items+externs.len];
 
     for (items) |item| {
         try writer.print("extern {f};\n", .{f.ext(item)});
@@ -56,9 +57,7 @@ fn emitRootVarbs(writer: *Writer, f: Fmt, varbs: LocationExtraList) !void {
     const extra = f.graph.constants[varbs.extra..varbs.extra+varbs.len];
 
     for (items, extra) |item, con| {
-        const typx = f.graph.typxs[item.typx];
-
-        try writer.print("{f} {f} = {f};\n", .{f.typ(typx), f.loc(item), f.con(con)});
+        try writer.print("{f} {f} = {f};\n", .{f.typ(item), f.loc(item), f.con(con)});
     }
 }
 
@@ -75,9 +74,7 @@ fn emitFunctionVarbs(writer: *Writer, f: Fmt, varbs: LocationList) !void {
     const items = f.graph.locations[varbs.items..varbs.items+varbs.len];
 
     for (items) |item| {
-        const typx = f.graph.typxs[item.typx];
-
-        try writer.print("\t{f} {f};\n", .{f.typ(typx), f.loc(item)});
+        try writer.print("\t{f} {f};\n", .{f.typ(item), f.loc(item)});
     }
 }
 
@@ -146,11 +143,9 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.locations[m.src];
 
-            const dtx = f.graph.typxs[dst.typx];
-
             try writer.print("\t{f} = *({f} *) {f};\n", .{
                 f.loc(dst),
-                f.typ(dtx),
+                f.typ(dst),
                 f.loc(src),
             });
         },
@@ -158,10 +153,8 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.locations[m.src];
 
-            const dtx = f.graph.typxs[dst.typx];
-
             try writer.print("\t*({f} *) {f} = {f};\n", .{
-                f.typ(dtx),
+                f.typ(dst),
                 f.loc(dst),
                 f.loc(src),
             });
