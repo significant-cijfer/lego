@@ -57,7 +57,8 @@ fn emitRootVarbs(writer: *Writer, f: Fmt, varbs: LocationExtraList) !void {
     const extra = f.graph.constants[varbs.extra..varbs.extra+varbs.len];
 
     for (items, extra) |item, con| {
-        try writer.print("{f} {f} = {f};\n", .{f.typ(item), f.loc(item), f.con(con)});
+        if (f.graph.emittable(item.typx))
+            try writer.print("{f} {f} = {f};\n", .{f.typ(item), f.loc(item), f.con(con)});
     }
 }
 
@@ -74,7 +75,8 @@ fn emitFunctionVarbs(writer: *Writer, f: Fmt, varbs: LocationList) !void {
     const items = f.graph.locations[varbs.items..varbs.items+varbs.len];
 
     for (items) |item| {
-        try writer.print("\t{f} {f};\n", .{f.typ(item), f.loc(item)});
+        if (f.graph.emittable(item.typx))
+            try writer.print("\t{f} {f};\n", .{f.typ(item), f.loc(item)});
     }
 }
 
@@ -101,7 +103,11 @@ fn emitFunctionBlock(writer: *Writer, gpa: Allocator, f: Fmt, root: Int) !void {
         switch (block.flow) {
             .ret => |v| {
                 const location = f.graph.locations[v];
-                try writer.print("\treturn {f};\n", .{f.loc(location)});
+
+                if (f.graph.emittable(location.typx))
+                    try writer.print("\treturn {f};\n", .{f.loc(location)})
+                else
+                    try writer.print("\treturn;\n", .{});
             },
             .jmp => |j| {
                 try todo.append(gpa, j);
@@ -125,6 +131,8 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.constants[m.src];
 
+            if (!f.graph.emittable(dst.typx)) return;
+
             try writer.print("\t{f} = {f};\n", .{
                 f.loc(dst),
                 f.con(src),
@@ -134,6 +142,8 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.locations[m.src];
 
+            if (!f.graph.emittable(dst.typx)) return;
+
             try writer.print("\t{f} = {f};\n", .{
                 f.loc(dst),
                 f.loc(src),
@@ -142,6 +152,8 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
         .get => |m| {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.locations[m.src];
+
+            if (!f.graph.emittable(dst.typx)) return;
 
             try writer.print("\t{f} = *({f} *) {f};\n", .{
                 f.loc(dst),
@@ -153,6 +165,8 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.locations[m.src];
 
+            if (!f.graph.emittable(dst.typx)) return;
+
             try writer.print("\t*({f} *) {f} = {f};\n", .{
                 f.typ(dst),
                 f.loc(dst),
@@ -162,6 +176,8 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
         .neg, .not => |m| {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.locations[m.src];
+
+            if (!f.graph.emittable(dst.typx)) return;
 
             const op = switch (inst) {
                 .neg => "-",
@@ -179,6 +195,8 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
             const dst = f.graph.locations[b.dst];
             const lhs = f.graph.locations[b.lhs];
             const rhs = f.graph.locations[b.rhs];
+
+            if (!f.graph.emittable(dst.typx)) return;
 
             const op = switch (inst) {
                 .add => "+",
@@ -212,10 +230,12 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
             const src = f.graph.locations[v.src];
             const args = f.graph.locations[v.idx..v.idx+v.len];
 
-            try writer.print("\t{f} = {f}(", .{
-                f.loc(dst),
-                f.loc(src),
-            });
+            try writer.print("\t", .{});
+
+            if (f.graph.emittable(dst.typx))
+                try writer.print("{f} = ", .{ f.loc(dst) });
+
+            try writer.print("{f}(", .{f.loc(src)});
 
             for (args, 1..) |arg, idx| {
                 try writer.print("{f}", .{f.loc(arg)});

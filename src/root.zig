@@ -15,6 +15,13 @@ pub const Graph = struct {
     insts: []const Inst,
     typxs: []const Typx,
     root: Root,
+
+    pub fn emittable(self: Graph, typx: Int) bool {
+        return switch (self.typxs[typx]) {
+            .noval => false,
+            else => true,
+        };
+    }
 };
 
 pub const Root = struct {
