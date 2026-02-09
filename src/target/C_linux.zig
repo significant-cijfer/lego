@@ -155,9 +155,8 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
 
             if (!f.graph.emittable(dst.typx)) return;
 
-            try writer.print("\t{f} = *({f} *) {f};\n", .{
+            try writer.print("\t{f} = *({f});\n", .{
                 f.loc(dst),
-                f.typ(dst),
                 f.loc(src),
             });
         },
@@ -167,8 +166,7 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
 
             if (!f.graph.emittable(dst.typx)) return;
 
-            try writer.print("\t*({f} *) {f} = {f};\n", .{
-                f.typ(dst),
+            try writer.print("\t*({f}) = {f};\n", .{
                 f.loc(dst),
                 f.loc(src),
             });
