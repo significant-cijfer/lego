@@ -54,6 +54,14 @@ pub fn main() !void {
                 .typx = 5,
             },
         },
+        .callables = &.{
+            .{
+                .name = 9,
+                .prms = 7,
+                .len = 1,
+                .ret = 7
+            },
+        },
         .constants = &.{
             .{ .primitive = .{ .limbs = &.{10}, .positive = true } },
             .{ .primitive = .{ .limbs = &.{103}, .positive = true } },
@@ -73,6 +81,7 @@ pub fn main() !void {
             "x",
             "y",
             "Z",
+            "echo",
         },
         .blocks = &.{
             .{
@@ -106,12 +115,17 @@ pub fn main() !void {
             .{ .primitive = .{ .bits = 64, .sign = true } },
             .{ .aggregate = .{ .names = 6, .items = 0, .len = 2 } },
             .{ .primitive = .{ .bits = 16, .sign = true } },
+            .{ .primitive = .{ .bits = 64, .sign = false } },
         },
         .root = .{
             .imports = .{
                 .names = 8,
                 .items = 6,
                 .len = 1
+            },
+            .externs = .{
+                .items = 0,
+                .len = 1,
             },
             .varbs = .{
                 .items = 1,

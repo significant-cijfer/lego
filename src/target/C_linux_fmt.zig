@@ -21,6 +21,10 @@ pub const Fmt = struct {
     pub fn proto(self: Fmt, func: lib.Function) Prototype {
         return .{ .graph = self.graph, .cell = func };
     }
+
+    pub fn ext(self: Fmt, c: lib.Callable) Extern {
+        return .{ .graph = self.graph, .cell = c };
+    }
 };
 
 pub const Prototype = struct {
@@ -117,6 +121,23 @@ pub const Typx = struct {
 
                 try writer.print("{s}int{d}_t", .{sign, p.bits});
             },
+            .function => |i| {
+                const c = f.graph.callables[i];
+                const name = f.graph.strings[c.name];
+                const prms = f.graph.typxs[c.prms..c.prms+c.len];
+                const ret = f.graph.typxs[c.ret];
+
+                try writer.print("{f} (*{s})(", .{f.typ(ret), name});
+
+                for (prms, 1..) |prm, idx| {
+                    try writer.print("{f}", .{f.typ(prm)});
+
+                    if (idx != c.len)
+                        try writer.print(",", .{});
+                }
+
+                try writer.print(")", .{});
+            },
             .aggregate => |a| {
                 const names = f.graph.strings[a.names..a.names+a.len];
                 const items = f.graph.typxs[a.items..a.items+a.len];
@@ -128,5 +149,30 @@ pub const Typx = struct {
                 try writer.print("}}", .{});
             },
         }
+    }
+};
+
+pub const Extern = struct {
+    graph: *const Graph,
+    cell: lib.Callable,
+
+    pub fn format(self: Extern, writer: *std.Io.Writer) !void {
+        const f = Fmt{ .graph = self.graph };
+        const cell = self.cell;
+
+        const name = f.graph.strings[cell.name];
+        const prms = f.graph.typxs[cell.prms..cell.prms+cell.len];
+        const ret = f.graph.typxs[cell.ret];
+
+        try writer.print("{f} {s}(", .{f.typ(ret), name});
+
+        for (prms, 1..) |prm, idx| {
+            try writer.print("{f}", .{f.typ(prm)});
+
+            if (idx != cell.len)
+                try writer.print(",", .{});
+        }
+
+        try writer.print(")", .{});
     }
 };

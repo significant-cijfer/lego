@@ -10,6 +10,7 @@ pub const Graph = struct {
     functions: []const Function,
     locations: []const Location,
     constants: []const Constant,
+    callables: []const Callable,
     strings: []const []const u8,
     blocks: []const Block,
     insts: []const Inst,
@@ -19,6 +20,7 @@ pub const Graph = struct {
 
 pub const Root = struct {
     imports: StringList,
+    externs: CallList,
     varbs: LocationExtraList,
 };
 
@@ -42,6 +44,11 @@ pub const LocationList = struct {
 pub const LocationExtraList = struct {
     items: Int,
     extra: Int,
+    len: Int,
+};
+
+pub const CallList = struct {
+    items: Int,
     len: Int,
 };
 
@@ -127,14 +134,24 @@ pub const Constant = union(enum) {
     aggregate: StringList,
 };
 
+pub const Callable = struct {
+    name: Int,
+    prms: Int,
+    len: Int,
+    ret: Int,
+};
+
 pub const Typx = union(enum) {
     word: void,
     pointer: void,
-    primitive: struct {
+    function: Int,
+    primitive: Primitive,
+    aggregate: StringList,
+
+    const Primitive = struct {
         bits: Int,
         sign: bool,
-    },
-    aggregate: StringList,
+    };
 
     //NOTE, size in bytes - bitpadding
     pub fn size(self: Typx, graph: *const Graph) Int {
