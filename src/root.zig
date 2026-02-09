@@ -76,6 +76,7 @@ pub const Inst = union(enum) {
     mov: MonOp,
     get: MonOp,
     set: MonOp,
+    ref: MonOp,
     neg: MonOp,
     not: MonOp,
     add: BinOp,

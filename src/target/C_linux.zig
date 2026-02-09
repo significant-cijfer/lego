@@ -173,6 +173,17 @@ fn emitInst(writer: *Writer, f: Fmt, inst: Inst) !void {
                 f.loc(src),
             });
         },
+        .ref => |m| {
+            const dst = f.graph.locations[m.dst];
+            const src = f.graph.locations[m.src];
+
+            if (!f.graph.emittable(dst.typx)) return;
+
+            try writer.print("\t{f} = &{f};\n", .{
+                f.loc(dst),
+                f.loc(src),
+            });
+        },
         .neg, .not => |m| {
             const dst = f.graph.locations[m.dst];
             const src = f.graph.locations[m.src];
