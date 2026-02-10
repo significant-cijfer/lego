@@ -155,6 +155,14 @@ pub const Typx = union(enum) {
         ret: Int,
     };
 
+    pub const NOVAL = Typx{
+        .noval = {},
+    };
+
+    pub const WORD = Typx{
+        .word = {},
+    };
+
     //NOTE, size in bytes - bitpadding
     pub fn size(self: Typx, graph: *const Graph) Int {
         return switch (self) {
