@@ -40,6 +40,7 @@ pub fn main() !void {
             .{ .code = .{ .temp = false, .token = 3 }, .typx = 3 },
             .{ .code = .{ .temp = true, .token = 1 }, .typx = 7 },
             .{ .code = .{ .temp = true, .token = 2 }, .typx = 7 },
+            .{ .code = .{ .temp = false, .token = 5 }, .typx = 0 },
         },
         .constants = &.{
             .{ .primitive = .{ .limbs = &.{10}, .positive = true } },
@@ -92,10 +93,13 @@ pub fn main() !void {
             .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 32, .sign = false } },
             .{ .primitive = .{ .bits = 64, .sign = true } },
-            .{ .aggregate = .{ .names = 6, .items = 0, .len = 2 } },
+            .{ .aggregate = {} },
             .{ .primitive = .{ .bits = 16, .sign = true } },
             .{ .primitive = .{ .bits = 64, .sign = false } },
             .{ .function = .{ .prms = 7, .len = 1, .ret = 8 }},
+        },
+        .typedefs = &.{
+            .{ .names = 6, .items = 0, .len = 2 },
         },
         .root = .{
             .imports = .{
@@ -105,6 +109,10 @@ pub fn main() !void {
             },
             .externs = .{
                 .items = 3,
+                .len = 1,
+            },
+            .typedefs = .{
+                .items = 9,
                 .len = 1,
             },
             .varbs = .{

@@ -28,9 +28,18 @@ pub fn emitHeader(writer: *Writer) !void {
 }
 
 pub fn emitRoot(writer: *Writer, f: Fmt, root: Root) !void {
+    try emitRootTypedefs(writer, f, root.typedefs);
     try emitRootImports(writer, f, root.imports);
     try emitRootExterns(writer, f, root.externs);
     try emitRootVarbs(writer, f, root.varbs);
+}
+
+fn emitRootTypedefs(writer: *Writer, f: Fmt, typedefs: LocationList) !void {
+    const items = f.graph.locations[typedefs.items..typedefs.items+typedefs.len];
+
+    for (items) |item| {
+        try writer.print("{f};\n", .{f.def(item)});
+    }
 }
 
 fn emitRootImports(writer: *Writer, f: Fmt, imports: StringList) !void {

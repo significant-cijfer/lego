@@ -6,23 +6,27 @@ const Graph = lib.Graph;
 pub const Fmt = struct {
     graph: *const Graph,
 
-    pub fn loc(self: Fmt, l: lib.Location) Location {
-        return .{ .graph = self.graph, .cell = l };
+    pub fn loc(self: Fmt, c: lib.Location) Location {
+        return .{ .graph = self.graph, .cell = c };
     }
 
-    pub fn typ(self: Fmt, t: lib.Location) Typx {
-        return .{ .graph = self.graph, .cell = t };
+    pub fn typ(self: Fmt, c: lib.Location) Typx {
+        return .{ .graph = self.graph, .cell = c };
     }
 
     pub fn con(self: Fmt, c: lib.Constant) Constant {
         return .{ .graph = self.graph, .cell = c };
     }
 
-    pub fn proto(self: Fmt, func: lib.Function) Prototype {
-        return .{ .graph = self.graph, .cell = func };
+    pub fn proto(self: Fmt, c: lib.Function) Prototype {
+        return .{ .graph = self.graph, .cell = c };
     }
 
     pub fn ext(self: Fmt, c: lib.Location) Extern {
+        return .{ .graph = self.graph, .cell = c };
+    }
+
+    pub fn def(self: Fmt, c: lib.Location) Typedef {
         return .{ .graph = self.graph, .cell = c };
     }
 };
@@ -142,19 +146,8 @@ pub const Typx = struct {
 
                 try writer.print(")", .{});
             },
-            .aggregate => |a| {
-                try writer.print("struct {{", .{});
-
-                for (a.names..a.names+a.len, a.items..a.items+a.len) |name, item| {
-                    const loc = lib.Location{
-                        .code = .{ .token = @intCast(name), .temp = false },
-                        .typx = @intCast(item),
-                    };
-
-                    try writer.print("{f} {f};", .{f.typ(loc), f.loc(loc)});
-                }
-
-                try writer.print("}}", .{});
+            .aggregate => {
+                try writer.print("struct {f}", .{f.loc(cell)});
             },
         }
     }
@@ -182,5 +175,30 @@ pub const Extern = struct {
         }
 
         try writer.print(")", .{});
+    }
+};
+
+pub const Typedef = struct {
+    graph: *const Graph,
+    cell: lib.Location,
+
+    pub fn format(self: Typedef, writer: *std.Io.Writer) !void {
+        const f = Fmt{ .graph = self.graph };
+        const cell = self.cell;
+
+        const def = f.graph.typedefs[cell.typx];
+
+        try writer.print("struct {f} {{", .{f.loc(cell)});
+
+        for (def.names..def.names+def.len, def.items..def.items+def.len) |name, item| {
+            const loc = lib.Location{
+                .code = .{ .token = @intCast(name), .temp = false },
+                .typx = @intCast(item),
+            };
+
+            try writer.print("{f} {f};", .{f.typ(loc), f.loc(loc)});
+        }
+
+        try writer.print("}}", .{});
     }
 };

@@ -10,6 +10,7 @@ pub const Graph = struct {
     functions: []const Function,
     locations: []const Location,
     constants: []const Constant,
+    typedefs: []const TypeDef,
     strings: []const []const u8,
     blocks: []const Block,
     insts: []const Inst,
@@ -27,6 +28,7 @@ pub const Graph = struct {
 pub const Root = struct {
     imports: StringList,
     externs: LocationList,
+    typedefs: LocationList,
     varbs: LocationExtraList,
 };
 
@@ -136,13 +138,15 @@ pub const Constant = union(enum) {
     aggregate: StringList,
 };
 
+pub const TypeDef = StringList;
+
 pub const Typx = union(enum) {
     noval: void,
     word: void,
     pointer: Int,
     function: Callable,
     primitive: Primitive,
-    aggregate: StringList,
+    aggregate: void,
 
     const Primitive = struct {
         bits: Int,
