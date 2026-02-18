@@ -13,6 +13,10 @@ defmodule Lego do
 
   """
   def hello do
-    :world
+    graph = %Lego.Graph{}
+
+    Lego.Graph.emit(graph)
+
+    graph
   end
 end
