@@ -127,7 +127,7 @@ pub const Location = struct {
     code: Code,
     typx: Int,
 
-    const Code = struct {
+    pub const Code = struct {
         token: Int,
         temp: bool,
     };
