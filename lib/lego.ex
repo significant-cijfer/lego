@@ -3,20 +3,27 @@ defmodule Lego do
   Documentation for `Lego`.
   """
 
-  @doc """
-  Hello world.
+  alias Lego.Renderer
+  alias Lego.Graph
+  alias Lego.Block
+  alias Lego.Flow
+  alias Lego.Inst
 
-  ## Examples
+  import Graph
+  import Block
 
-      iex> Lego.hello()
-      :world
-
-  """
   def hello do
-    graph = %Lego.Graph{}
+    :world
+  end
 
-    Lego.Graph.emit(graph)
+  def example() do
+    block0 = %Block{}
+      |> add_inst(%Inst.Add{ dst: "c", lhs: "a", rhs: "b" })
+      |> set_flow(%Flow.Stop{ value: "c" })
 
-    graph
+    graph = %Graph{}
+      |> add_block(block0)
+
+    Renderer.render(%Renderer.X8664Intel{}, graph)
   end
 end

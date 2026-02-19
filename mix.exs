@@ -24,6 +24,7 @@ defmodule Lego.MixProject do
     [
       {:typed_struct, "~> 0.3.0"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:structo, "~> 0.2.0"},
     ]
   end
 end
