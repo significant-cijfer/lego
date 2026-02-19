@@ -22,9 +22,9 @@ defmodule Lego.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:typed_struct, "~> 0.3.0"},
+      {:typed_struct, "~> 0.3"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:structo, "~> 0.2.0"},
+      {:structo, "~> 0.2"},
     ]
   end
 end
