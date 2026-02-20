@@ -1,6 +1,6 @@
 %{
   "dialyxir": {:hex, :dialyxir, "1.4.7", "dda948fcee52962e4b6c5b4b16b2d8fa7d50d8645bbae8b8685c3f9ecb7f5f4d", [:mix], [{:erlex, ">= 0.2.8", [hex: :erlex, repo: "hexpm", optional: false]}], "hexpm", "b34527202e6eb8cee198efec110996c25c5898f43a4094df157f8d28f27d9efe"},
   "erlex": {:hex, :erlex, "0.2.8", "cd8116f20f3c0afe376d1e8d1f0ae2452337729f68be016ea544a72f767d9c12", [:mix], [], "hexpm", "9d66ff9fedf69e49dc3fd12831e12a8a37b76f8651dd21cd45fcf5561a8a7590"},
-  "structo": {:hex, :structo, "0.2.0", "104ee41e6594547f27c5db8f2a2ae6e2ca4c83a888c0aa8d9e924ccdb60ccaf2", [:mix], [], "hexpm", "12fd563ecd13130871b28535165ce82165586b10468cfa2c68c24bb9e03088b1"},
+  "structo": {:hex, :structo, "0.2.1", "1c5b85048c1816fae482b8581597e3cf2717771ee3ebaa44b70fc737938dcb40", [:mix], [], "hexpm", "aaf0f86c592cbed2af8998086b48e701d04045ed0c85ac8a3f96a836a4fde611"},
   "typed_struct": {:hex, :typed_struct, "0.3.0", "939789e3c1dca39d7170c87f729127469d1315dcf99fee8e152bb774b17e7ff7", [:mix], [], "hexpm", "c50bd5c3a61fe4e198a8504f939be3d3c85903b382bde4865579bc23111d1b6d"},
 }
