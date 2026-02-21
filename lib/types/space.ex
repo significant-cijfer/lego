@@ -1,3 +1,4 @@
 defmodule Lego.Space do
-  @type t() :: nil
+  @type t() ::
+    {:register, String.t()}
 end

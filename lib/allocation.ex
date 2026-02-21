@@ -8,7 +8,6 @@ defmodule Lego.Allocation do
   alias Lego.Space
 
   typedstruct enforce: true do
-    field :intervals, intervals(), default: %{}
     field :spaces, spaces(), default: %{}
   end
 
@@ -21,16 +20,34 @@ defmodule Lego.Allocation do
   @type intervals() :: %{ Location.t() => Interval.t() }
   @type spaces() :: %{ Location.t() => Space.t() }
 
+  @type interval() :: { Location.t(), Interval.t() }
+  @type space() :: { Location.t(), Space.t() }
+
+  @type active() :: %{ Location.t() => {Interval.t(), Space.t()} }
+  @type pool() :: MapSet.t(Space.t())
+
   @spec scan(algorithm(), Graph.t()) :: t()
   def scan(:linear, graph) do
-    build_intervals(graph)
+    intervals = build_intervals(graph)
+    registers = MapSet.new([
+      {:register, "ra"},
+      {:register, "rb"},
+      {:register, "rc"},
+      {:register, "rd"},
+    ])
+
+    #dbg intervals
+    intervals
+      |> Enum.sort(fn {_, a}, {_, b} -> a.start <= b.start end)
+      |> Enum.reduce({registers, %{}}, &handle_interval/2)
 
     %__MODULE__{}
   end
 
   @spec build_intervals(Graph.t()) :: intervals()
   def build_intervals(graph) do
-    dbg graph.blocks
+    #dbg graph.blocks
+    graph.blocks
       |> Enum.map(fn block -> block.insts end)
       |> List.flatten()
       |> Enum.reverse()
@@ -61,5 +78,41 @@ defmodule Lego.Allocation do
       |> Enum.reduce(map, fn write, map ->
         Map.put_new(map, write, %Interval{ start: index, end: nil })
       end)
+  end
+
+  @spec handle_interval(interval(), {pool(), active()}) :: {pool(), active()} | :todo
+  def handle_interval({k, v}, ctx) do
+    ctx = expire_old_intervals(v, ctx)
+    ctx = insert_interval({k, v}, ctx)
+    ctx
+  end
+
+  @spec expire_old_intervals(Interval.t(), {pool(), active()}) :: {pool(), active()}
+  def expire_old_intervals(current, {pool, active}) do
+    dbg active
+      |> Enum.sort(fn {_, {a, _}}, {_, {b, _}} -> a.end <= b.end end)
+      |> Enum.filter(fn {_, {a, _}} -> a.end <= current.start end)
+      |> Enum.reduce({pool, active}, &expire_interval/2)
+  end
+
+  @spec expire_interval({Location.t(), {Interval.t(), Space.t()}}, {pool(), active()}) :: {pool(), active()}
+  def expire_interval({k, {_iv, space}}, {pool, active}) do
+    {
+      MapSet.put(pool, space),
+      Map.delete(active, k)
+    }
+  end
+
+  @spec insert_interval(interval(), {pool(), active()}) :: {pool(), active()} | :todo
+  def insert_interval({k, v}, {pool, active}) do
+    if Enum.empty?(pool) do
+        :todo
+    else
+      register = Enum.at(pool, 0)
+      {
+          MapSet.delete(pool, register),
+          Map.put(active, k, {v, register})
+      }
+    end
   end
 end
