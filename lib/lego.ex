@@ -27,7 +27,8 @@ defmodule Lego do
     graph = %Graph{}
       |> add_block(block0)
 
-    Allocation.scan(:linear, graph)
+    allocation = Allocation.scan(:linear, graph)
+    dbg allocation
 
     Renderer.render(%Renderer.X8664Intel{}, graph)
   end

@@ -6,6 +6,10 @@ defmodule Lego.Inst do
 
   import Structo
 
+  typedstruct module: Nop, enforce: true do
+    field :src, Location.t() | nil
+  end
+
   typedstruct module: Put, enforce: true do
     field :dst, Location.t()
     field :src, Constant.t()
@@ -18,12 +22,15 @@ defmodule Lego.Inst do
   end
 
   @type t() ::
-    Put.t()
+    Nop.t()
+    | Put.t()
     | Add.t()
 
   @spec reads(t()) :: [Location.t()]
   def reads(inst) do
     case inst do
+      ~m{:Nop, src: nil} -> []
+      ~m{:Nop, src} -> [src]
       ~m{:Put} -> []
       ~m{:Add, lhs, rhs} -> [lhs, rhs]
     end
@@ -32,6 +39,7 @@ defmodule Lego.Inst do
   @spec writes(t()) :: [Location.t()]
   def writes(inst) do
     case inst do
+      ~m{:Nop} -> []
       ~m{:Put, dst} -> [dst]
       ~m{:Add, dst} -> [dst]
     end

@@ -1,4 +1,5 @@
 defmodule Lego.Space do
   @type t() ::
-    {:register, String.t()}
+    :stack
+    | {:register, String.t()}
 end
