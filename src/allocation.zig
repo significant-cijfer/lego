@@ -11,20 +11,21 @@ const Int = lego.Int;
 const Str = lego.Str;
 
 pub const Allocation = struct {
-    active: StringHashMap(Register),
-    pool: EnumSet(Register),
+    const Intervals = std.ArrayList(Interval);
+    const Spaces = std.StringHashMap(Space);
 
-    const Intervals = std.StringArrayHashMap(Interval);
+    const Active = std.ArrayList(Interval);
+    const Pool = std.EnumSet(Register);
 
-    pub fn scan(gpa: Allocator, graph: Graph) !StringHashMap(Register) {
-        const active = StringHashMap(Register).init(gpa);
+    pub fn scan(gpa: Allocator, graph: Graph) !Spaces {
+        const spaces = Spaces.init(gpa);
 
         const ivs = try buildIntervals(gpa, graph);
         for (ivs.keys(), ivs.values()) |key, value| {
             std.debug.print("iv, k: {s}, v: {}\n", .{key, value});
         }
 
-        return active;
+        return spaces;
     }
 
     fn buildIntervals(gpa: Allocator, graph: Graph) !Intervals {
@@ -75,6 +76,9 @@ pub const Allocation = struct {
             .end = null,
         });
     }
+
+    fn handleInterval() void {
+    }
 };
 
 const Register = enum {
@@ -82,6 +86,11 @@ const Register = enum {
     rb,
     rc,
     rd,
+};
+
+const Space = union(enum) {
+    register: Register,
+    stack: void,
 };
 
 const Interval = struct {
