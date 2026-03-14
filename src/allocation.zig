@@ -11,18 +11,20 @@ const Int = lego.Int;
 const Str = lego.Str;
 
 pub const Allocation = struct {
-    const Intervals = std.ArrayList(Interval);
+    const Intervals = std.StringArrayHashMap(Interval);
     const Spaces = std.StringHashMap(Space);
-
-    const Active = std.ArrayList(Interval);
     const Pool = std.EnumSet(Register);
 
     pub fn scan(gpa: Allocator, graph: Graph) !Spaces {
-        const spaces = Spaces.init(gpa);
+        var spaces = Spaces.init(gpa);
+        var active = Intervals.init(gpa);
+        var pool = Pool.initFull();
 
         const ivs = try buildIntervals(gpa, graph);
-        for (ivs.keys(), ivs.values()) |key, value| {
-            std.debug.print("iv, k: {s}, v: {}\n", .{key, value});
+        for (ivs.keys(), ivs.values()) |_, iv| {
+            if (iv.end == null) continue;
+
+            try handleInterval(&spaces, &active, &pool, iv);
         }
 
         return spaces;
@@ -72,12 +74,17 @@ pub const Allocation = struct {
             return error.IntervalFound;
 
         try map.putNoClobber(write, .{
+            .location = write,
             .start = idx,
             .end = null,
         });
     }
 
-    fn handleInterval() void {
+    fn handleInterval(spaces: *Spaces, active: *Intervals, pool: *Pool, iv: Interval) !void {
+        _ = spaces;
+        _ = active;
+        _ = pool;
+        _ = iv;
     }
 };
 
@@ -94,6 +101,7 @@ const Space = union(enum) {
 };
 
 const Interval = struct {
+    location: Str,
     start: Int,
     end: ?Int,
 };
