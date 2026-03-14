@@ -16,11 +16,12 @@ pub const Allocation = struct {
     const Pool = std.EnumSet(Register);
 
     pub fn scan(gpa: Allocator, graph: Graph) !Spaces {
-        var spaces = Spaces.init(gpa);
         var active = Intervals.init(gpa);
+        var spaces = Spaces.init(gpa);
         var pool = Pool.initFull();
 
         const ivs = try buildIntervals(gpa, graph);
+
         for (ivs.keys(), ivs.values()) |_, iv| {
             if (iv.end == null) continue;
 
@@ -81,10 +82,17 @@ pub const Allocation = struct {
     }
 
     fn handleInterval(spaces: *Spaces, active: *Intervals, pool: *Pool, iv: Interval) !void {
-        _ = spaces;
-        _ = active;
-        _ = pool;
-        _ = iv;
+        try expireOldIntervals(active, pool, iv);
+        try insertInterval(spaces, active, pool, iv);
+    }
+
+    fn expireOldIntervals(spaces: *const Spaces, active: *Intervals, pool: *Pool, iv: Interval) !void {
+    }
+
+    fn expireInterval(spaces: *const Spaces, active: *Intervals, pool: *Pool, iv: Interval) !void {
+    }
+
+    fn insertInterval(spaces: *Spaces, active: *Intervals, pool: *Pool, iv: Interval) !void {
     }
 };
 
