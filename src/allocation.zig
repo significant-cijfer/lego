@@ -87,6 +87,7 @@ pub const Allocation = struct {
     }
 
     fn expireOldIntervals(spaces: *const Spaces, active: *Intervals, pool: *Pool, iv: Interval) !void {
+        std.mem.sort(Interval, active.items, {}, .sortActive);
     }
 
     fn expireInterval(spaces: *const Spaces, active: *Intervals, pool: *Pool, iv: Interval) !void {
@@ -112,4 +113,8 @@ const Interval = struct {
     location: Str,
     start: Int,
     end: ?Int,
+
+    fn sortActive(_: void, lhs: Interval, rhs: Interval) bool {
+        return lhs.end.? <= rhs.end.?;
+    }
 };
